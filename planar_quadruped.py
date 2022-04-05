@@ -1,0 +1,20 @@
+import numpy as np
+
+
+class PlanarQuadruped:
+    def __init__(self, body_mass: float, body_length: float, thigh_length: float, calf_length: float):
+        self.m = body_mass
+        self.b_l = body_length
+        self.t_l = thigh_length
+        self.c_l = calf_length
+
+    def dynamics(self, u, t):
+        # x = [x_com, y_com, theta_com], body CoM position and orientation
+        # u = [F1, F2], ground reaction forces
+        # return xdot at time t
+        return 0.0
+
+    def dynamics_jacobians(self, u, t):
+        # we want to get the discrete-time state space model x[t+1] = Ax[t] + Bu[t]
+        # return A and B at time t
+        return 0.0
