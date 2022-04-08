@@ -11,10 +11,10 @@ class PlanarQuadruped:
     def dynamics(self, u, t):
         # x = [x_com, y_com, theta_com], body CoM position and orientation
         # u = [F1, F2], ground reaction forces
-        # return xdot at time t
+        # TODO: return xdot at time t
         return 0.0
 
     def dynamics_jacobians(self, u, t):
-        # we want to get the discrete-time state space model x[t+1] = Ax[t] + Bu[t]
-        # return A and B at time t
+        # we want to get the discrete-time state space model x[k+1] = Ax[k] + Bu[k]
+        # TODO: return A and B at time t
         return 0.0
