@@ -4,10 +4,10 @@ from planar_quadruped import *
 from quadratic_cost import *
 
 
-def eval_f(nlp: NLP, model: PlanarQuadruped, Z):
+def eval_f(nlp: NLP, Z):
     K = nlp.K
     J = 0.0
-    eval_midpoints(nlp, model, Z)
+    eval_midpoints(nlp, Z)
 
     ix, iu = nlp.xinds, nlp.uinds
     for k in range(K - 1):
@@ -21,11 +21,11 @@ def eval_f(nlp: NLP, model: PlanarQuadruped, Z):
     return J
 
 
-def grad_f(nlp: NLP, model: PlanarQuadruped, Z):
-    eval_dynamics(nlp, model, Z)
-    eval_midpoints(nlp, model, Z)
-    eval_dynamics_jacobians(nlp, model, Z)
-    eval_midpoint_jacobians(nlp, model, Z)
+def grad_f(nlp: NLP, Z):
+    eval_dynamics(nlp, Z)
+    eval_midpoints(nlp, Z)
+    eval_dynamics_jacobians(nlp, Z)
+    eval_midpoint_jacobians(nlp, Z)
 
     ix, iu = nlp.xinds, nlp.uinds
     n = nlp.n
@@ -47,7 +47,6 @@ def grad_f(nlp: NLP, model: PlanarQuadruped, Z):
         u1, u2 = Z[iu[k]], Z[iu[k + 1]]
         xm = nlp.xm[k]
         um = nlp.um[k]
-        t = nlp.times[k]
         h = nlp.times[k + 1] - nlp.times[k]
 
         # TASK: Compute the cost gradient

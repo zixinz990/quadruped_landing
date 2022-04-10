@@ -1,10 +1,9 @@
 from dynamics import *
 
 
-def eval_c(nlp: NLP, model: PlanarQuadruped, Z):
+def eval_c(nlp: NLP, Z):
     """
     :param nlp:
-    :param model:
     :param Z:
     :return: c: an array with dim n(K+1) x 1
     """
@@ -16,8 +15,8 @@ def eval_c(nlp: NLP, model: PlanarQuadruped, Z):
     c = np.zeros((n * (K + 1), 1))
     c[idx] = Z[xi[0]] - nlp.x0
 
-    eval_dynamics(nlp, model, Z)
-    eval_midpoints(nlp, model, Z)
+    eval_dynamics(nlp, Z)
+    eval_midpoints(nlp, Z)
 
     for k in range(K - 1):
         idx = idx + n  # [3, 4, 5], [6, 7, 8], ..., [3(K-1), 3(K-1)+1, 3(K-1)+2]
@@ -35,15 +34,14 @@ def eval_c(nlp: NLP, model: PlanarQuadruped, Z):
     return c
 
 
-def jac_c(nlp: NLP, model: PlanarQuadruped, Z):
+def jac_c(nlp: NLP, Z):
     """
     :param nlp:
-    :param model:
     :param Z:
     :return: jac: a matrix with dim n(K+1) x (n+m)K
     """
-    eval_dynamics_jacobians(nlp, model, Z)
-    eval_midpoint_jacobians(nlp, model, Z)
+    eval_dynamics_jacobians(nlp, Z)
+    eval_midpoint_jacobians(nlp, Z)
 
     K = nlp.K
     n = nlp.n

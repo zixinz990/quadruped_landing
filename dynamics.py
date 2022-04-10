@@ -2,23 +2,23 @@ from nlp import *
 from planar_quadruped import *
 
 
-def eval_dynamics(nlp: NLP, model: PlanarQuadruped, Z):
+def eval_dynamics(nlp: NLP, Z):
     ix, iu = nlp.xinds, nlp.uinds
     for k in range(nlp.K):
         t = nlp.times[k]
         x, u = Z[ix[k]], Z[iu[k]]
-        nlp.f[k] = model.dynamics(x, u, t)
+        nlp.f[k] = nlp.model.dynamics(x, u, t)
 
 
-def eval_dynamics_jacobians(nlp: NLP, model: PlanarQuadruped, Z):
+def eval_dynamics_jacobians(nlp: NLP, Z):
     ix, iu = nlp.xinds, nlp.uinds
     for k in range(nlp.K):
         t = nlp.times[k]
         x, u = Z[ix[k]], Z[iu[k]]
-        nlp.A[k], nlp.B[k] = model.dynamics_jacobians(x, u, t)
+        nlp.A[k], nlp.B[k] = nlp.model.dynamics_jacobians(x, u, t)
 
 
-def eval_midpoints(nlp: NLP, model: PlanarQuadruped, Z):
+def eval_midpoints(nlp: NLP, Z):
     ix, iu = nlp.xinds, nlp.uinds
     for k in range(nlp.K - 1):
         h = nlp.times[k + 1] - nlp.times[k]
@@ -31,14 +31,14 @@ def eval_midpoints(nlp: NLP, model: PlanarQuadruped, Z):
         xm = (x1 + x2) / 2 + h / 8 * (f1 - f2)
         um = (u1 + u2) / 2
 
-        fm = model.dynamics(xm, um, t + h / 2)
+        fm = nlp.model.dynamics(xm, um, t + h / 2)
 
         nlp.fm[k] = fm
         nlp.xm[k] = xm
         nlp.um[k] = um
 
 
-def eval_midpoint_jacobians(nlp: NLP, model: PlanarQuadruped, Z):
+def eval_midpoint_jacobians(nlp: NLP, Z):
     for k in range(nlp.K - 1):
         h = nlp.times[k + 1] - nlp.times[k]
         t = nlp.times[k]
@@ -47,7 +47,7 @@ def eval_midpoint_jacobians(nlp: NLP, model: PlanarQuadruped, Z):
 
         xm, um = nlp.xm[k], nlp.um[k]
 
-        Am, Bm = model.dynamics_jacobians(xm, um, t + h / 2)
+        Am, Bm = nlp.model.dynamics_jacobians(xm, um, t + h / 2)
 
         dxmx1 = (np.identity(nlp.n) / 2 + h / 8 * A1)  # (n,n)
         dxmu1 = h / 8 * B1  # (n,m)
