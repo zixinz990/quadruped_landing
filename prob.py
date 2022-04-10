@@ -11,21 +11,23 @@ class PlanarQuadrupedLandingProblem:
         self.tf = 2.0  # final time (sec)
 
         # TODO: make sure x0 is updated at each time step during falling
-        self.x0 = np.zeros(3)
-        # TODO: define xf
-        self.xf = np.zeros(3)
+        self.x0 = np.zeros((self.n, 1))
 
+        # TODO: define xf
+        self.xf = np.zeros((self.n, 1))
+
+        # TODO: define cost function matrices
         # J = x'Qx + q'x + u'Ru + r'u
-        self.Q = np.zeros(self.n, self.n)
-        self.q = np.zeros(self.n, 1)
-        self.R = np.zeros(self.m, self.m)
-        self.r = np.zeros(self.m, 1)
-        self.Qf = np.zeros(self.n, self.n)
-        self.qf = np.zeros(self.n, 1)
+        self.Q = np.zeros((self.n, self.n))
+        self.q = np.zeros((self.n, 1))
+        self.R = np.zeros((self.m, self.m))
+        self.r = np.zeros((self.m, 1))
+        self.Qf = np.zeros((self.n, self.n))
+        self.qf = np.zeros((self.n, 1))
 
     def get_initial_trajectory(self):
-        times = np.linspace(0, self.tf, num=self.N)
+        times = np.linspace(0, self.tf, num=self.K)
         # TODO: generate initial trajectory
-        X = 0
-        U = 0
+        X = [np.zeros((self.n, 1)) for k in range(self.K)]
+        U = [np.zeros((self.m, 1)) for k in range(self.K)]
         return X, U
