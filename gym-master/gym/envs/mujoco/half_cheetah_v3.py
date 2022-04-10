@@ -136,6 +136,7 @@ class HalfCheetahEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         ctrl_cost_weight=0.1,
         reset_noise_scale=0.1,
         exclude_current_positions_from_observation=True,
+        init_qpos = np.array([0,0,0,0,0,0,0])
     ):
         utils.EzPickle.__init__(**locals())
 
@@ -151,6 +152,7 @@ class HalfCheetahEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         mujoco_env.MujocoEnv.__init__(self, xml_file, 5)
 
+        self.init_qpos = init_qpos
     def control_cost(self, action):
         control_cost = self._ctrl_cost_weight * np.sum(np.square(action))
         return control_cost
@@ -188,7 +190,6 @@ class HalfCheetahEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def reset_model(self):
         noise_low = -self._reset_noise_scale
         noise_high = self._reset_noise_scale
-        self.init_qpos = np.array([0,6,1,0,0,0,0])
         qpos = self.init_qpos + self.np_random.uniform(
             low=noise_low, high=noise_high, size=self.model.nq
         )
