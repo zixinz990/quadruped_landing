@@ -1,5 +1,5 @@
 from nlp import *
-from planar_quadruped import *
+from model import *
 
 
 def eval_dynamics(nlp: NLP, Z):

@@ -1,6 +1,6 @@
 from prob import *
 from quadratic_cost import *
-from planar_quadruped import *
+from model import *
 
 
 class NLP:

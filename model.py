@@ -9,7 +9,7 @@ class PlanarQuadruped:
         self.c_l = calf_length
         self.g = 9.8
 
-    def dynamics(self, x: np.ndarray, u: np.ndarray, r: np.ndarray, t):
+    def dynamics(self, x: np.ndarray, u: np.ndarray, r: np.ndarray):
         """
         :param x = [x_com, y_com, theta_com, x_com_dot, y_com_dot, theta_com_dot], body CoM position and orientation, column vector with dim 6
         :param u = [F1, F2], ground reaction forces, column vector with dim 4
@@ -37,7 +37,14 @@ class PlanarQuadruped:
 
         return x_dot
 
-    def dynamics_jacobians(self, x: np.ndarray, u: np.ndarray, r: np.ndarray, t):
+    def dynamics_jacobians(self, x: np.ndarray, u: np.ndarray, r: np.ndarray):
+        """
+        :param x = [x_com, y_com, theta_com, x_com_dot, y_com_dot, theta_com_dot], body CoM position and orientation, column vector with dim 6
+        :param u = [F1, F2], ground reaction forces, column vector with dim 4
+        :param r = [r1, r2], foot positions, column vector with dim 4
+        :return: A = df/dx, matrix with dimension 6 x 6
+                 B = df/du, matrix with dimension 6 x 4
+        """
         # we want to get the discrete-time state space model x[k+1] = Ax[k] + Bu[k]
         F_1x = u[0]
         F_1y = u[1]

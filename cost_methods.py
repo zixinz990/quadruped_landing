@@ -1,6 +1,6 @@
 from nlp import *
 from dynamics import *
-from planar_quadruped import *
+from model import *
 from quadratic_cost import *
 
 
