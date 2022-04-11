@@ -37,7 +37,33 @@ class PlanarQuadruped:
 
         return x_dot
 
-    def dynamics_jacobians(self, x: np.ndarray, u: np.ndarray, t):
+    def dynamics_jacobians(self, x: np.ndarray, u: np.ndarray, r: np.ndarray, t):
         # we want to get the discrete-time state space model x[k+1] = Ax[k] + Bu[k]
-        # TODO: return A and B at time t
-        return 0.0
+        F_1x = u[0]
+        F_1y = u[1]
+        F_1 = u[0:2]
+
+        F_2x = u[2]
+        F_2y = u[3]
+        F_2 = u[2:4]
+
+        r_1x = r[0]
+        r_1y = r[1]
+        r_2x = r[2]
+        r_2y = r[3]
+
+        A = np.zeros((6, 6))
+        A[0, 3] = 1.0
+        A[1, 4] = 1.0
+        A[2, 5] = 1.0
+
+        B = np.zeros((6, 4))
+        B[3, 0] = 1 / self.m
+        B[3, 2] = 1 / self.m
+        B[4, 1] = 1 / self.m
+        B[4, 3] = 1 / self.m
+        B[5, 0] = -12 * r_1y / (self.m * self.b_l * self.b_l)
+        B[5, 1] = 12 * r_1x / (self.m * self.b_l * self.b_l)
+        B[5, 2] = -12 * r_2y / (self.m * self.b_l * self.b_l)
+        B[5, 3] = 12 * r_2x / (self.m * self.b_l * self.b_l)
+        return A, B
