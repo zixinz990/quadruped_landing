@@ -1,17 +1,15 @@
-from prob import *
 from quadratic_cost import *
-from model import *
+from planar_quadruped_landing import *
 
 
 class NLP:
-    def __init__(self, prob: PlanarQuadrupedLandingProblem, model: PlanarQuadruped, cost: QuadraticCost):
+    def __init__(self, prob: PlanarQuadrupedLanding, cost: QuadraticCost):
         # x[k+1] = Ax[k] + Bu[k]
         # A: n x n
         # x: n x 1
         # B: n x m
         # u: m x 1
         self.prob = prob
-        self.model = model
         self.cost = cost
 
         self.K = prob.K
@@ -25,19 +23,23 @@ class NLP:
 
         # xinds: a list of length K, each element is an array
         # [0, 1, 2], [7, 8, 9], [14, 15, 16], ..., [(K-1)(n+m), (K-1)(n+m+1), (K-1)(n+m+2)]
-        self.xinds = [np.arange(self.n) + k * (self.n + self.m) for k in range(self.K)]
+        self.xinds = [np.arange(self.n) + k * (self.n + self.m)
+                      for k in range(self.K)]
 
         # uinds: a list of length K, each element is an array
         # [3, 4, 5, 6], [10, 11, 12, 13], [17, 18, 19, 20], ..., [(K-1)(n+m)+3, (K-1)(n+m+1)+3, (K-1)(n+m+2)+3, (K-1)(n+m+2)+4]
-        self.uinds = [np.arange(self.n, self.n + self.m) + k * (self.n + self.m) for k in range(self.K)]
+        self.uinds = [np.arange(self.n, self.n + self.m) +
+                      k * (self.n + self.m) for k in range(self.K)]
 
         self.f = [np.zeros((self.n, 1)) for k in range(self.K)]
 
         self.A = [np.zeros((self.n, self.n)) for k in range(self.K)]
         self.B = [np.zeros((self.n, self.m)) for k in range(self.K)]
 
-        self.Am = [[np.zeros((self.n, self.n)) for i in range(3)] for k in range(self.K)]
-        self.Bm = [[np.zeros((self.n, self.m)) for i in range(3)] for k in range(self.K)]
+        self.Am = [[np.zeros((self.n, self.n)) for i in range(3)]
+                   for k in range(self.K)]
+        self.Bm = [[np.zeros((self.n, self.m)) for i in range(3)]
+                   for k in range(self.K)]
 
         self.fm = [np.zeros((self.n, 1)) for k in range(self.K)]
         self.xm = [np.zeros((self.n, 1)) for k in range(self.K)]

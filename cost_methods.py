@@ -3,6 +3,7 @@ from dynamics import *
 from model import *
 from quadratic_cost import *
 
+# this file may not be needed anymore
 
 def eval_f(nlp: NLP, Z):
     K = nlp.K
