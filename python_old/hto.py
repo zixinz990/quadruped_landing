@@ -1,5 +1,8 @@
 class HTO():
 
+    def __init__(self):
+        pass
+
     def objective(self, Z):
         """
         Returns the scalar value of the objective given x.
@@ -11,6 +14,8 @@ class HTO():
         Returns the gradient of the objective with respect to x. Should be a 1-dim numpy array
         """
         return 0
+    
+    def 
 
     def constraints(self, Z):
         """
