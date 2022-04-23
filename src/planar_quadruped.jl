@@ -17,8 +17,8 @@ Base.@kwdef struct PlanarQuadruped <: AbstractModel
     l2::Float64 = 0.3   # calf length
 end
 
-RobotDynamics.state_dim(::PlanarQuadruped) = 10
-RobotDynamics.control_dim(::PlanarQuadruped) = 8
+RobotDynamics.state_dim(::PlanarQuadruped) = 14
+RobotDynamics.control_dim(::PlanarQuadruped) = 2
 
 function contact1_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
