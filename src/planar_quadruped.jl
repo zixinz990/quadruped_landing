@@ -263,21 +263,21 @@ end
 
 function contact1_jacobian(model::PlanarQuadruped, x, u, dt)
     xi = SVector{10}(1:14)
-    ui = SVector{8}(1:2) .+ 14
+    ui = SVector{8}(1:4) .+ 14
     f(z) = contact1_dynamics_rk4(model, z[xi], z[ui], dt)
     return ForwardDiff.jacobian(f, [x; u])
 end
 
 function contact2_jacobian(model::PlanarQuadruped, x, u, dt)
     xi = SVector{10}(1:14)
-    ui = SVector{8}(1:2) .+ 14
+    ui = SVector{8}(1:4) .+ 14
     f(z) = contact2_dynamics_rk4(model, z[xi], z[ui], dt)
     return ForwardDiff.jacobian(f, [x; u])
 end
 
 function contact3_jacobian(model::PlanarQuadruped, x, u, dt)
     xi = SVector{10}(1:14)
-    ui = SVector{8}(1:2) .+ 14
+    ui = SVector{8}(1:4) .+ 14
     f(z) = contact3_dynamics_rk4(model, z[xi], z[ui], dt)
     return ForwardDiff.jacobian(f, [x; u])
 end
