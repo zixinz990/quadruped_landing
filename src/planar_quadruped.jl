@@ -9,7 +9,7 @@ using LinearAlgebra
 using TrajOptPlots
 
 Base.@kwdef struct PlanarQuadruped <: AbstractModel
-    g::Float64 = 9.81   # gravity
+    g::Float64 = -9.81   # gravity
     mb::Float64 = 10.0  # body mass
     mf::Float64 = 0.1   # foot mass
     lb::Float64 = 1.0   # body length
@@ -24,6 +24,7 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
     mb = model.mb
     lb = model.lb
+    mf = model.mf
     Ib = mb*lb^2 / 12
 
     # state = [pb, θ, vb, ω, p1, p2]
@@ -54,7 +55,7 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     x_dot[10] = τF / Ib
 
     # foot 1 constraints
-    x_dot[11:12] = 0
+    x_dot[11:12] .= 0.
 
     #foot 2 dynamics
     x_dot[13:14] .= F2 ./ mf
@@ -84,6 +85,7 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
     mb = model.mb
     lb = model.lb
+    mf = model.mf
     Ib = mb*lb^2 / 12
 
     # state = [pb, θ, vb, ω, p1, p2]
@@ -157,6 +159,7 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
     mb = model.mb
     lb = model.lb
+    mf = model.mf
     Ib = mb*lb^2 / 12
 
     # state = [pb, θ, vb, ω, p1, p2]
