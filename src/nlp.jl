@@ -34,6 +34,7 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
     Nmodes::Int                              # number of modes
     init_mode::Int                           # the mode ID of the initial state
     t_trans::Float64                         # the staet time of mode 3 (sec)
+    k_trans::Float64                         # the start index of mode 3
     tf::Float64                              # total time (sec)
     x0::MVector{n,Float64}                   # initial condition
     xf::MVector{n,Float64}                   # final condition
@@ -59,12 +60,13 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         uinds = [SVector{m}((k-1)*(n+m) .+ (n+1:n+m)) for k = 1:N-1]
         times = collect(range(0, tf, length=N))
         
-        # TODO: Specify the mode sequence
+        # Contact schedule
         modes = map(1:N) do k
             (times[k] < t_trans) ? init_mode : 3
         end
         Nmodes = 2
 
+        # Calculate k_trans
         k_trans = 0
         for k = 1:N-1
             if times[k] < t_trans && times[k+1] >= t_trans
@@ -73,26 +75,24 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
             end
         end
         
-        # TODO: specify the constraint indices
+        # Constraints
         c_init_inds = 1:n                                                                               # initial constraint
         c_term_inds = (c_init_inds[end]+1):(c_init_inds[end]+n)                                         # terminal constraint
         c_dyn_inds = (c_term_inds[end]+1):(c_term_inds[end]+(N-1)*n)                                    # dynamics constraints
-        c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+2*N-1)                                 # contact constraints of the initial mode (2 per time step)
+        c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+2*N)                                 # contact constraints of the initial mode (2 per time step)
         c_other_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+2*(N-k_trans)+1)  # contact constraints of another leg (2 per time step)
         c_kin_inds = (c_other_contact_inds[end]+1):(c_other_contact_inds[end]+2*N)                      # kinematic constraints (2 per time step)
-        c_col_inds = (c_kin_inds[end]+1):(c_kin_inds[end]+N)                                            # self-collision constraints (1 per time step)
+        # c_col_inds = (c_kin_inds[end]+1):(c_kin_inds[end]+N)                                            # self-collision constraints (1 per time step)
         
-        m_nlp = c_col_inds[end]  # total number of constraints
-        
-        # TODO: specify the bounds on the constraints
+        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_other_contact_inds, c_kin_inds]
+        m_nlp = cinds[end]  # total number of constraints
+
+        # Constraints bounds
         lb = fill(0.0, m_nlp) # lower bounds on the constraints
         ub = fill(0.0, m_nlp) # upper bounds on the constraints
 
         ub[c_kin_inds] .= model.l1 + model.l2 + model.lb/2
         ub[c_col_inds] .= 2*(model.l1+model.l2) + model.lb
-
-        # TODO: Other initialization
-        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_other_contact_inds, c_kin_inds, c_col_inds]
 
         n_nlp = n*N + (N-1)*m
         zL = fill(-Inf, n_nlp)
@@ -103,7 +103,7 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         
         new{n,m,typeof(model), integration}(
             model, obj,
-            N, Nmodes, init_mode, t_trans, tf, x0, xf, times, modes,
+            N, Nmodes, init_mode, t_trans, k_trans, tf, x0, xf, times, modes,
             xinds, uinds, cinds, lb, ub, zL, zU, rows, cols, use_sparse_jacobian, blocks
         )
     end

@@ -2,7 +2,6 @@
 # contact constraints of the initial mode (2 per time step)
 # contact constraints of another leg (2 per time step)
 # kinematic constraints (2 per time step)
-# self-collision constraints (1 per time step)
 
 """
     dynamics_constraint!(nlp, c, Z)
@@ -13,22 +12,12 @@ function dynamics_constraint!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     xi, ui = nlp.xinds, nlp.uinds
     model = nlp.model
     init_mode = nlp.init_mode
-    N = nlp.N                      # number of time steps
+    N = nlp.N
     dt = nlp.times[2]
-    t_trans = nlp.t_trans
+    k_trans = nlp.k_trans
 
     # Grab a view of the indices for the dynamics constraints
-    d = reshape(view(c, nlp.cinds[3]), n, N - 1)
-
-    # TODO: calculate the hybrid dynamics constraints
-    # TIP: remember to include the jump map when the mode changes!
-    k_trans = 0
-    for k = 1:N-1
-        if times[k] < t_trans && times[k+1] >= t_trans
-            k_trans = k + 1
-            break
-        end
-    end
+    d = reshape(view(c, nlp.cinds[3]), n, N-1)
 
     for k = 1:N-1
         x, u = Z[xi[k]], Z[ui[k]]
@@ -50,7 +39,7 @@ function dynamics_constraint!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
         end
     end
 
-    return vec(d)   # for easy Jacobian checking
+    return vec(d)
 end
 
 """
@@ -61,31 +50,22 @@ Calculate the contact constraints of the initial mode for each time step.
 function contact_init_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     d = view(c, nlp.cinds[4])
 
-    # Some useful variables
     xi, ui = nlp.xinds, nlp.uinds
-    N = nlp.N                      # number of time steps
-    Nmodes = nlp.Nmodes            # number of mode sequences (N ÷ M)
+    N = nlp.N
     init_mode = nlp.init_mode
 
-    # TODO: Calculate the stance constraints
     for k = 1:N
         x = Z[xi[k]]
         if init_mode == 1
-            d[2*k-1] = x[8]
-            if k < N
-                u = Z[ui[k]]
-                d[2*k] = u[2]
-            end
+            d[2*k-1] = x[4] # x1 = 0
+            d[2*k] = x[5]   # y1 = 0
         else
-            d[2*k-1] = x[10]
-            if k < N
-                u = Z[ui[k]]
-                d[2*k] = u[4]
-            end
+            d[2*k-1] = x[6] # x2 = 0
+            d[2*k] = x[7]   # y2 = 0
         end
     end
 
-    return d  # for easy Jacobian checking
+    return d
 end
 
 """
@@ -98,37 +78,22 @@ function contact_another_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
 
     # Some useful variables
     xi, ui = nlp.xinds, nlp.uinds
-    N = nlp.N                      # number of time steps
-    Nmodes = nlp.Nmodes            # number of mode sequences (N ÷ M)
+    N = nlp.N
     init_mode = nlp.init_mode
-    t_trans = nlp.t_trans
-
-    k_trans = 0
-    for k = 1:N-1
-        if times[k] < t_trans && times[k+1] >= t_trans
-            k_trans = k + 1
-            break
-        end
-    end
+    k_trans = nlp.k_trans
 
     for k = 1:N-k_trans+1
         x = Z[xi[k]]
         if init_mode == 1
-            d[2*k-1] = x[10]
-            if k < N - k_trans + 1
-                u = Z[ui[k]]
-                d[2*k] = u[4]
-            end
+            d[2*k-1] = x[6] # x2 = 0
+            d[2*k] = x[7]   # y2 = 0
         else
-            d[2*k-1] = x[8]
-            if k < N - k_trans + 1
-                u = Z[ui[k]]
-                d[2*k] = u[2]
-            end
+            d[2*k-1] = x[4] # x1 = 0
+            d[2*k] = x[5]   # y1 = 0
         end
     end
 
-    return d  # for easy Jacobian checking
+    return d
 end
 
 """
@@ -137,27 +102,24 @@ end
 Calculate the kinematics constraints.
 """
 function kinematics_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
-    # Create a view for the portion for the length constraints
     d = view(c, nlp.cinds[6])
 
-    # Some useful variables
     xi, ui = nlp.xinds, nlp.uinds
-    N = nlp.N                      # number of time steps
-    Nmodes = nlp.Nmodes            # number of mode sequences (N ÷ M)
+    N = nlp.N
     init_mode = nlp.init_mode
 
     for k = 1:N
         x = Z[xi[k]]
 
         pb = x[1:2]
-        p1 = x[7:8]
-        p2 = x[9:10]
+        p1 = x[4:5]
+        p2 = x[6:7]
 
         d[2*k-1] = norm(pb - p1)
         d[2*k] = norm(pb - p2)
     end
 
-    return d   # for easy Jacobian checking
+    return d
 end
 
 """
@@ -165,27 +127,27 @@ end
 
 Calculate the self-collision constraints.
 """
-function self_collision_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
-    # Create a view for the portion for the length constraints
-    d = view(c, nlp.cinds[7])
+# function self_collision_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
+#     # Create a view for the portion for the length constraints
+#     d = view(c, nlp.cinds[7])
 
-    # Some useful variables
-    xi, ui = nlp.xinds, nlp.uinds
-    N = nlp.N                      # number of time steps
-    Nmodes = nlp.Nmodes            # number of mode sequences (N ÷ M)
-    init_mode = nlp.init_mode
+#     # Some useful variables
+#     xi, ui = nlp.xinds, nlp.uinds
+#     N = nlp.N                      # number of time steps
+#     Nmodes = nlp.Nmodes            # number of mode sequences (N ÷ M)
+#     init_mode = nlp.init_mode
 
-    for k = 1:N
-        x = Z[xi[k]]
+#     for k = 1:N
+#         x = Z[xi[k]]
 
-        p1 = x[7:8]
-        p2 = x[9:10]
+#         p1 = x[7:8]
+#         p2 = x[9:10]
 
-        d[k] = norm(p1 - p2)
-    end
+#         d[k] = norm(p1 - p2)
+#     end
 
-    return d   # for easy Jacobian checking
-end
+#     return d   # for easy Jacobian checking
+# end
 
 """
     eval_c!(nlp, c, Z)
@@ -200,12 +162,11 @@ function eval_c!(nlp::HybridNLP, c, Z)
     contact_init_constraints!(nlp, c, Z)
     contact_another_constraints!(nlp, c, Z)
     kinematics_constraints!(nlp, c, Z)
-    self_collision_constraints!(nlp, c, Z)
+    # self_collision_constraints!(nlp, c, Z)
 end
 
-# TASK: Implement the following methods
-#       1. dynamics_jacobian! (9 pts)
-#       2. jac_c!             (6 pts)
+# dynamics_jacobian!
+# jac_c!
 
 """
     dynamics_jacobian!(nlp, jac, Z)
@@ -220,20 +181,11 @@ function dynamics_jacobian!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     xi, ui = nlp.xinds, nlp.uinds
     model = nlp.model
     init_mode = nlp.init_mode
-    N = nlp.N                      # number of time steps
+    N = nlp.N
     dt = nlp.times[2]
-    t_trans = nlp.t_trans
+    k_trans = nlp.k_trans
 
-    # TODO: Calculate the dynamics Jacobians
     ci = 1:n
-
-    k_trans = 0
-    for k = 1:N-1
-        if times[k] < t_trans && times[k+1] >= t_trans
-            k_trans = k + 1
-            break
-        end
-    end
 
     for k = 1:N-1
         x, u = Z[xi[k]], Z[ui[k]]
@@ -287,12 +239,8 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     jac_contact_init = view(jac, nlp.cinds[4], :)
     jac_contact_another = view(jac, nlp.cinds[5], :)
     jac_kinematics = view(jac, nlp.cinds[6], :)
-    jac_self_collision = view(jac, nlp.cinds[7], :)
+    # jac_self_collision = view(jac, nlp.cinds[7], :)
 
-    # TODO: Calculate all the Jacobians
-    #  TIP: You can write extra functions for the other constraints, or just do them here (they're pretty easy)
-    #  TIP: Consider starting with ForwardDiff and then implement analytically (you won't get full points if you don't
-    #       implement the Jacobians analytically)
     jac_init .= I(n)
     jac_term .= I(n)
 
@@ -302,17 +250,13 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     # jac_contact_init
     if init_mode == 1
         for k = 1:N
-            jac_contact_init[k, xi[k][8]] = 1
-            if k < N
-                jac_contact_init[k, ui[k][2]] = 1
-            end
+            jac_contact_init[k, xi[k][4]] = 1.0 # x1
+            jac_contact_init[k, xi[k][5]] = 1.0 # y1
         end
     else
         for k = 1:N
-            jac_contact_init[k, xi[k][10]] = 1
-            if k < N
-                jac_contact_init[k, ui[k][4]] = 1
-            end
+            jac_contact_init[k, xi[k][6]] = 1.0 # x2
+            jac_contact_init[k, xi[k][7]] = 1.0 # y2
         end
     end
 
@@ -320,18 +264,14 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     if init_mode == 1
         for k = k_trans:N
             i = k - k_trans + 1
-            jac_contact_another[i, xi[k][10]] = 1
-            if k < N
-                jac_contact_another[i, ui[k][4]] = 1
-            end
+            jac_contact_another[i, xi[k][6]] = 1.0 # x2
+            jac_contact_another[i, ui[k][7]] = 1.0 # y2
         end
     else
         for k = k_trans:N
             i = k - k_trans + 1
-            jac_contact_another[i, xi[k][8]] = 1
-            if k < N
-                jac_contact_another[i, ui[k][2]] = 1
-            end
+            jac_contact_another[i, xi[k][4]] = 1.0 # x1
+            jac_contact_another[i, ui[k][5]] = 1.0 # y1
         end
     end
 
@@ -342,22 +282,22 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
         d1 = x[1:2] - x[7:8]
         d2 = x[1:2] - x[9:10]
 
-        jac_kinematics[2*k-1, xi[k][1:2]] = d1 / norm(d1)
-        jac_kinematics[2*k-1, xi[k][7:8]] = -d1 / norm(d1)
+        jac_kinematics[2*k-1, xi[k][1:2]] = d1 / norm(d1)  # pb
+        jac_kinematics[2*k-1, xi[k][4:5]] = -d1 / norm(d1) # p1
 
-        jac_kinematics[2*k, xi[k][1:2]] = d2 / norm(d2)
-        jac_kinematics[2*k, xi[k][9:10]] = -d2 / norm(d2)
+        jac_kinematics[2*k, xi[k][1:2]] = d2 / norm(d2)  # pb
+        jac_kinematics[2*k, xi[k][6:7]] = -d2 / norm(d2) # p2
     end
 
     # jac_self_collision
-    for k = 1:N
-        x = Z[xi[k]]
+    # for k = 1:N
+    #     x = Z[xi[k]]
 
-        d12 = x[7:8] - x[9:10]
+    #     d12 = x[7:8] - x[9:10]
 
-        jac_self_collision[k, xi[k][7:8]] = d12 / norm(d12)
-        jac_self_collision[k, xi[k][9:10]] = -d12 / norm(d12)
-    end
+    #     jac_self_collision[k, xi[k][7:8]] = d12 / norm(d12)
+    #     jac_self_collision[k, xi[k][9:10]] = -d12 / norm(d12)
+    # end
 
     return nothing
 end
