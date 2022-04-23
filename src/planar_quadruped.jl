@@ -18,7 +18,7 @@ Base.@kwdef struct PlanarQuadruped <: AbstractModel
 end
 
 RobotDynamics.state_dim(::PlanarQuadruped) = 14
-RobotDynamics.control_dim(::PlanarQuadruped) = 2
+RobotDynamics.control_dim(::PlanarQuadruped) = 4
 
 function contact1_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
@@ -42,10 +42,13 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     F1 = u[1:2]
     F2 = u[3:4]
 
+    @show 3
     x_dot = zeros(length(x))
 
+    @show 4
     x_dot[1:7] .= x[8:14]
     
+    @show 5
     # body_dynamics
     temp_acc = (F1+F2) ./ mb
     x_dot[8] = temp_acc[1]
@@ -237,7 +240,9 @@ end
 function contact1_dynamics_rk4(model, x, u, h)
     # RK4 integration with zero-order hold on u
     f1 = contact1_dynamics(model, x, u)
+    @show 1
     f2 = contact1_dynamics(model, x + 0.5*h*f1, u)
+    @show 2
     f3 = contact1_dynamics(model, x + 0.5*h*f2, u)
     f4 = contact1_dynamics(model, x + h*f3, u)
     return x + (h/6.0)*(f1 + 2*f2 + 2*f3 + f4)
@@ -262,22 +267,22 @@ function contact3_dynamics_rk4(model, x, u, h)
 end
 
 function contact1_jacobian(model::PlanarQuadruped, x, u, dt)
-    xi = SVector{10}(1:14)
-    ui = SVector{8}(1:2) .+ 14
-    f(z) = contact1_dynamics_rk4(model, z[xi], z[ui], dt)
+    xi = SVector{14}(1:14)
+    ui = SVector{4}(1:4) .+ 14
+    @show f(z) = contact1_dynamics_rk4(model, z[xi], z[ui], dt)
     return ForwardDiff.jacobian(f, [x; u])
 end
 
 function contact2_jacobian(model::PlanarQuadruped, x, u, dt)
-    xi = SVector{10}(1:14)
-    ui = SVector{8}(1:2) .+ 14
+    xi = SVector{14}(1:14)
+    ui = SVector{4}(1:4) .+ 14
     f(z) = contact2_dynamics_rk4(model, z[xi], z[ui], dt)
     return ForwardDiff.jacobian(f, [x; u])
 end
 
 function contact3_jacobian(model::PlanarQuadruped, x, u, dt)
-    xi = SVector{10}(1:14)
-    ui = SVector{8}(1:2) .+ 14
+    xi = SVector{14}(1:14)
+    ui = SVector{4}(1:4) .+ 14
     f(z) = contact3_dynamics_rk4(model, z[xi], z[ui], dt)
     return ForwardDiff.jacobian(f, [x; u])
 end
