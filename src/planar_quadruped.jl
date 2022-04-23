@@ -231,7 +231,7 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     
     # ẋ = [vb; ω; v̇b; α; v1; v2]
 
-    return ẋ
+    return x_dot
 end
 
 function contact1_dynamics_rk4(model, x, u, h)
