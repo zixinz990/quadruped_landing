@@ -16,26 +16,30 @@ function dynamics_constraint!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     dt = nlp.times[2]
     k_trans = nlp.k_trans
 
-    # Grab a view of the indices for the dynamics constraints
-    d = reshape(view(c, nlp.cinds[3]), n, N-1)
+    d = reshape(view(c, nlp.cinds[3]), (n, N-1))  # size = n * (N-1)
+    # d = c_x1_1 c_x1_2 ... c_x1_k ... c_x1_N-1
+    #     c_x2_1 c_x2_2 ... c_x2_k ... c_x2_N-1
+    #     ...    ...    ... ...    ... ...
+    #     c_xn_1 c_xn_2 ... c_xn_k ... c_xn_N-1
 
     for k = 1:N-1
         x, u = Z[xi[k]], Z[ui[k]]
         x_next = Z[xi[k+1]]
+
         if k < k_trans - 1  # in mode 1 or 2
             if init_mode == 1
-                d[:, k] = contact1_dynamics_rk4(model, x, u, dt) - x_next
+                d[:, k] .= contact1_dynamics_rk4(model, x, u, dt) - x_next
             else
-                d[:, k] = contact2_dynamics_rk4(model, x, u, dt) - x_next
+                d[:, k] .= contact2_dynamics_rk4(model, x, u, dt) - x_next
             end
         elseif k == k_trans - 1  # before transition, jump!
             if init_mode == 1
-                d[:, k] = jump1_map(contact1_dynamics_rk4(model, x, u, dt)) - x_next
+                d[:, k] .= jump1_map(contact1_dynamics_rk4(model, x, u, dt)) - x_next
             else
-                d[:, k] = jump2_map(contact2_dynamics_rk4(model, x, u, dt)) - x_next
+                d[:, k] .= jump2_map(contact2_dynamics_rk4(model, x, u, dt)) - x_next
             end
         else  # in mode 3
-            d[:, k] = contact3_dynamics_rk4(model, x, u, dt) - x_next
+            d[:, k] .= contact3_dynamics_rk4(model, x, u, dt) - x_next
         end
     end
 
@@ -76,11 +80,11 @@ Calculate the contact constraints of another leg for each time step after transi
 function contact_another_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     d = view(c, nlp.cinds[5])
 
-    # Some useful variables
     xi, ui = nlp.xinds, nlp.uinds
     N = nlp.N
     init_mode = nlp.init_mode
     k_trans = nlp.k_trans
+
     for k = 1:N-k_trans+1
         x = Z[xi[k]]
         if init_mode == 1
@@ -191,9 +195,9 @@ function dynamics_jacobian!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
 
         if k < k_trans - 1  # in mode 1 or 2
             if init_mode == 1
-                D[ci, [xi[k]; ui[k]]] = contact1_jacobian(model, x, u, dt)
+                D[ci, [xi[k]; ui[k]]] .= contact1_jacobian(model, x, u, dt)
             else
-                D[ci, [xi[k]; ui[k]]] = contact2_jacobian(model, x, u, dt)
+                D[ci, [xi[k]; ui[k]]] .= contact2_jacobian(model, x, u, dt)
             end
         elseif k == k_trans - 1  # before transition, jump!
             if init_mode == 1
@@ -202,7 +206,7 @@ function dynamics_jacobian!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
                 D[ci, [xi[k]; ui[k]]] .= jump2_jacobian() * contact2_jacobian(model, x, u, dt)
             end
         else  # in mode 3
-            D[ci, [xi[k]; ui[k]]] = contact3_jacobian(model, x, u, dt)
+            D[ci, [xi[k]; ui[k]]] .= contact3_jacobian(model, x, u, dt)
         end
 
         D[ci, xi[k+1]] .= -I(n)
@@ -242,13 +246,13 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     # jac_contact_init
     if init_mode == 1
         for k = 1:N
-            jac_contact_init[k, xi[k][4]] = 1.0 # x1
-            jac_contact_init[k, xi[k][5]] = 1.0 # y1
+            jac_contact_init[2*k-1, xi[k][4]] = 1.0 # x1
+            jac_contact_init[2*k, xi[k][5]] = 1.0   # y1
         end
     else
         for k = 1:N
-            jac_contact_init[k, xi[k][6]] = 1.0 # x2
-            jac_contact_init[k, xi[k][7]] = 1.0 # y2
+            jac_contact_init[2*k-1, xi[k][6]] = 1.0 # x2
+            jac_contact_init[2*k, xi[k][7]] = 1.0   # y2
         end
     end
 
@@ -256,14 +260,14 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     if init_mode == 1
         for k = k_trans:N
             i = k - k_trans + 1
-            jac_contact_another[i, xi[k][6]] = 1.0 # x2
-            jac_contact_another[i, xi[k][7]] = 1.0 # y2
+            jac_contact_another[2*i-1, xi[k][6]] = 1.0 # x2
+            jac_contact_another[2*i, xi[k][7]] = 1.0   # y2
         end
     else
         for k = k_trans:N
             i = k - k_trans + 1
-            jac_contact_another[i, xi[k][4]] = 1.0 # x1
-            jac_contact_another[i, xi[k][5]] = 1.0 # y1
+            jac_contact_another[2*i-1, xi[k][4]] = 1.0 # x1
+            jac_contact_another[2*i, xi[k][5]] = 1.0   # y1
         end
     end
 
@@ -274,11 +278,11 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
         d1 = x[1:2] - x[7:8]
         d2 = x[1:2] - x[9:10]
 
-        jac_kinematics[2*k-1, xi[k][1:2]] = d1 / norm(d1)  # pb
-        jac_kinematics[2*k-1, xi[k][4:5]] = -d1 / norm(d1) # p1
+        jac_kinematics[2*k-1, xi[k][1:2]] .= d1 / norm(d1)  # pb
+        jac_kinematics[2*k-1, xi[k][4:5]] .= -d1 / norm(d1) # p1
 
-        jac_kinematics[2*k, xi[k][1:2]] = d2 / norm(d2)  # pb
-        jac_kinematics[2*k, xi[k][6:7]] = -d2 / norm(d2) # p2
+        jac_kinematics[2*k, xi[k][1:2]] .= d2 / norm(d2)    # pb
+        jac_kinematics[2*k, xi[k][6:7]] .= -d2 / norm(d2)   # p2
     end
 
     # jac_self_collision
