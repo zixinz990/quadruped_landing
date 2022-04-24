@@ -123,7 +123,7 @@ function solve(x0,prob::HybridNLP;
     solver.options["max_iter"] = max_iter
     solver.options["tol"] = tol
     solver.options["constr_viol_tol"] = c_tol
-    solver.options["print_level"] = 8
+    # solver.options["print_level"] = 8
 
     x = MOI.add_variables(solver, n_nlp)
 

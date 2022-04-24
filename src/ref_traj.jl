@@ -29,11 +29,11 @@ function reference_trajectory(model::PlanarQuadruped, times, t_trans, xinit, xte
     Xref[:, 1] .= xinit
     Xref[:, 2:end] .= xterm
 
-    a = 2 * Δx[4:7] / (t_trans^2) # acceleration of feet (assume feet have constant acceleration and zero velocity since touching the ground)
+    # a = 2 * Δx[4:7] / (t_trans^2) # acceleration of feet (assume feet have constant acceleration and zero velocity since touching the ground)
 
-    for k = 2:k_trans-1
-        Xref[11:14, :] .= xinit[11:14] + a * (k-1)*dt # v1 and v2
-    end
+    # for k = 2:k_trans-1
+    #     Xref[11:14, :] .= xinit[11:14] + a * (k-1)*dt # v1 and v2
+    # end
 
     if init_mode == 1
         Uref[2, :] .= mb*g/2           # F1_y

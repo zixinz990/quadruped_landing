@@ -10,11 +10,13 @@ using TrajOptPlots
 
 Base.@kwdef struct PlanarQuadruped <: AbstractModel
     g::Float64 = -9.81   # gravity
+    
     mb::Float64 = 10.0  # body mass
     mf::Float64 = 0.1   # foot mass
-    lb::Float64 = 1.0   # body length
-    l1::Float64 = 0.3   # thigh length
-    l2::Float64 = 0.3   # calf length
+
+    lb::Float64 = 0.5   # body length
+    l1::Float64 = 0.25   # thigh length
+    l2::Float64 = 0.25   # calf length
 end
 
 RobotDynamics.state_dim(::PlanarQuadruped) = 14
