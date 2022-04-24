@@ -108,7 +108,7 @@ The following arguments are sent to Ipopt
 * `max_iter`: maximum number of solver iterations
 """
 function solve(x0,prob::HybridNLP;
-        tol=1.0e-6,c_tol=1.0e-6,max_iter=10000)
+        tol=1.0e-6,c_tol=1.0e-6,max_iter=700)
     n_nlp, m_nlp = num_primals(prob), num_duals(prob)
     x_l, x_u = fill(-Inf,n_nlp), fill(+Inf,n_nlp)
     c_l, c_u = prob.lb, prob.ub
