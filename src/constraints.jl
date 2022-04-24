@@ -81,7 +81,6 @@ function contact_another_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     N = nlp.N
     init_mode = nlp.init_mode
     k_trans = nlp.k_trans
-
     for k = 1:N-k_trans+1
         x = Z[xi[k]]
         if init_mode == 1
@@ -223,14 +222,7 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     N = nlp.N
     init_mode = nlp.init_mode
     t_trans = nlp.t_trans
-
-    k_trans = 0
-    for k = 1:N-1
-        if times[k] < t_trans && times[k+1] >= t_trans
-            k_trans = k + 1
-            break
-        end
-    end
+    k_trans = nlp.k_trans
 
     # Create views for each portion of the Jacobian
     jac_init = view(jac, nlp.cinds[1], xi[1])
@@ -265,13 +257,13 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
         for k = k_trans:N
             i = k - k_trans + 1
             jac_contact_another[i, xi[k][6]] = 1.0 # x2
-            jac_contact_another[i, ui[k][7]] = 1.0 # y2
+            jac_contact_another[i, xi[k][7]] = 1.0 # y2
         end
     else
         for k = k_trans:N
             i = k - k_trans + 1
             jac_contact_another[i, xi[k][4]] = 1.0 # x1
-            jac_contact_another[i, ui[k][5]] = 1.0 # y1
+            jac_contact_another[i, xi[k][5]] = 1.0 # y1
         end
     end
 

@@ -268,9 +268,7 @@ end
 function contact1_dynamics_rk4(model, x, u, h)
     # RK4 integration with zero-order hold on u
     f1 = contact1_dynamics(model, x, u)
-    # @show 1
     f2 = contact1_dynamics(model, x + 0.5*h*f1, u)
-    # @show 2
     f3 = contact1_dynamics(model, x + 0.5*h*f2, u)
     f4 = contact1_dynamics(model, x + h*f3, u)
     return x + (h/6.0)*(f1 + 2*f2 + 2*f3 + f4)
@@ -297,7 +295,7 @@ end
 function contact1_jacobian(model::PlanarQuadruped, x, u, dt)
     xi = SVector{14}(1:14)
     ui = SVector{4}(1:4) .+ 14
-    @show f(z) = contact1_dynamics_rk4(model, z[xi], z[ui], dt)
+    f(z) = contact1_dynamics_rk4(model, z[xi], z[ui], dt)
     return ForwardDiff.jacobian(f, [x; u])
 end
 
