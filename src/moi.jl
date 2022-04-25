@@ -114,9 +114,11 @@ function solve(x0,prob::HybridNLP;
 
     x_l, x_u = fill(-Inf,n_nlp), fill(+Inf,n_nlp)
 
-    # lower bound of body position, should always above the ground
+    # lower bound of body and feet positions, should always above the ground
     for k = 1:N
         x_l[2+18*(k-1)] = 0.0 # yb >= 0
+        x_l[5+18*(k-1)] = 0.0 # y1 >= 0
+        x_l[7+18*(k-1)] = 0.0 # y2 >= 0
     end
 
     c_l, c_u = prob.lb, prob.ub
