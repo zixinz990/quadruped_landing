@@ -47,6 +47,7 @@ if __name__ == "__main__":
     y_data = np.stack((rear_foot_node_y, rear_leg_node_y, body_rear_node_y, body_front_node_y, front_leg_node_y, front_foot_node_y), axis=1)
     for i in range(data.shape[0]):
         plt.plot(x_data[i], y_data[i], c='b')
+        plt.plot([-1,0.5], [0,0], c='b') # plot the ground
         plt.scatter(x_data[i], y_data[i], c='r')
         plt.savefig('../results/temp.jpg')
         video_writer.append_data(imageio.imread('../results/temp.jpg'))

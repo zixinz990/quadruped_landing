@@ -22,6 +22,7 @@ for i in range(data.shape[0]):
     plt.plot([rear_x, front_x], [rear_y, front_y])
     plt.scatter(frame[3], frame[4], c='g')
     plt.scatter(frame[5], frame[6], c='b')
+    plt.plot([-1,0.5], [0,0], c='k') # plot the floor
     plt.ylim(-1,1)
     plt.xlim(-1, 0.5)
     plt.savefig('../results/temp.jpg')
