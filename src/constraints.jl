@@ -133,7 +133,7 @@ function body_pos_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
         x = Z[xi[k]]
         yb = x[2]
         theta = x[3]
-        d[k] = yb - lb / 2 * cos(theta)
+        d[k] = yb - lb / 2 * norm(sin(theta))
     end
 
     return d
@@ -286,8 +286,13 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
         x = Z[xi[k]]
         theta = x[3]
 
-        jac_body_pos[k, xi[k][2]] = 1.0               # yb
-        jac_body_pos[k, xi[k][3]] = lb / 2 * sin(theta) # theta
+        jac_body_pos[k, xi[k][2]] = 1.0 # yb
+
+        if theta > 0
+            jac_body_pos[k, xi[k][3]] = -lb / 2 * cos(theta)
+        else
+            jac_body_pos[k, xi[k][3]] = lb / 2 * cos(theta)
+        end
     end
 
     # # jac_kinematics
