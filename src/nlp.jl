@@ -76,35 +76,28 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         end
         
         # Constraints
-        c_init_inds = 1:n                                                                               # initial constraint
-        c_term_inds = (c_init_inds[end]+1):(c_init_inds[end]+n)                                         # terminal constraint
-        c_dyn_inds = (c_term_inds[end]+1):(c_term_inds[end]+(N-1)*n)                                    # dynamics constraints
-        
-        # c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+2*N)                                 # contact constraints of the initial mode (2 per time step)
-        c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+N)                                   # contact constraints of the initial mode (2 per time step)
+        c_init_inds          = 1:n                                                                 # initial constraint
+        c_term_inds          = (c_init_inds[end]+1):(c_init_inds[end]+n)                           # terminal constraint
+        c_dyn_inds           = (c_term_inds[end]+1):(c_term_inds[end]+(N-1)*n)                     # dynamics constraints       
+        c_init_contact_inds  = (c_dyn_inds[end]+1):(c_dyn_inds[end]+N)                             # contact constraints of the initial mode (2 per time step)
+        c_other_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+N-k_trans+1) # contact constraints of another leg (2 per time step)
+        c_body_pos_inds      = (c_other_contact_inds[end]+1):(c_other_contact_inds[end]+N)         # body position constraints
 
-        # c_other_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+2*(N-k_trans+1))  # contact constraints of another leg (2 per time step)
-        c_other_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+N-k_trans+1)  # contact constraints of another leg (2 per time step)
+        # c_kin_inds = (c_body_pos_inds[end]+1):(c_body_pos_inds[end]+2*N)                          # kinematic constraints (2 per time step)
 
-        c_kin_inds = (c_other_contact_inds[end]+1):(c_other_contact_inds[end]+2*N)                      # kinematic constraints (2 per time step)
-        # c_col_inds = (c_kin_inds[end]+1):(c_kin_inds[end]+N)                                            # self-collision constraints (1 per time step)
-        
-        # cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_other_contact_inds, c_kin_inds]
-        # m_nlp = c_kin_inds[end]  # total number of constraints
-
-        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_other_contact_inds, c_kin_inds]
-        m_nlp = c_kin_inds[end]
+        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_other_contact_inds, c_body_pos_inds]
+        m_nlp = c_body_pos_inds[end]
 
         # Constraints bounds
         lb = fill(0.0, m_nlp) # lower bounds on the constraints
         ub = fill(0.0, m_nlp) # upper bounds on the constraints
 
-        ub[c_kin_inds] .= model.l1 + model.l2 + model.lb/2
-        # ub[c_col_inds] .= 2*(model.l1+model.l2) + model.lb
+        ub[c_body_pos_inds] .= Inf
+        # ub[c_kin_inds] .= model.l1 + model.l2 + model.lb/2
 
         n_nlp = n*N + (N-1)*m
-        zL = fill(-Inf, n_nlp)
-        zU = fill(+Inf, n_nlp)
+        # zL = fill(-Inf, n_nlp)
+        # zU = fill(+Inf, n_nlp)
         rows = Int[]
         cols = Int[]
         blocks = BlockViews(m_nlp, n_nlp)
