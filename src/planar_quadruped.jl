@@ -65,7 +65,7 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     # x_dot[11:12] .= 0.
 
     #foot 2 dynamics
-    foot_2_v = F2 ./ mf
+    foot_2_v = -F2 ./ mf
     # x_dot[13:14] .= F2 ./ mf
     x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_v; foot_2_v]
 
@@ -136,7 +136,7 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
     # #foot 2 dynamics
     # x_dot[13:14] .= 0
 
-    foot_1_v = F1 ./ mf
+    foot_1_v = -F1 ./ mf
     # x_dot[11:12] .= 0.
 
     #foot 2 dynamics
