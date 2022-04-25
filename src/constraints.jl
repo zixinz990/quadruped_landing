@@ -182,7 +182,7 @@ function eval_c!(nlp::HybridNLP, c, Z)
     dynamics_constraint!(nlp, c, Z)
     contact_init_constraints!(nlp, c, Z)
     contact_another_constraints!(nlp, c, Z)
-    # kinematics_constraints!(nlp, c, Z)
+    kinematics_constraints!(nlp, c, Z)
     # self_collision_constraints!(nlp, c, Z)
 end
 
@@ -252,7 +252,7 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     jac_dynamics = view(jac, nlp.cinds[3], :)
     jac_contact_init = view(jac, nlp.cinds[4], :)
     jac_contact_another = view(jac, nlp.cinds[5], :)
-    # jac_kinematics = view(jac, nlp.cinds[6], :)
+    jac_kinematics = view(jac, nlp.cinds[6], :)
     # # jac_self_collision = view(jac, nlp.cinds[7], :)
 
     jac_init .= I(n)
@@ -311,19 +311,19 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
         end
     end
 
-    # # jac_kinematics
-    # for k = 1:N
-    #     x = Z[xi[k]]
+    # jac_kinematics
+    for k = 1:N
+        x = Z[xi[k]]
 
-    #     d1 = x[1:2] - x[7:8]
-    #     d2 = x[1:2] - x[9:10]
+        d1 = x[1:2] - x[7:8]
+        d2 = x[1:2] - x[9:10]
 
-    #     jac_kinematics[2*k-1, xi[k][1:2]] .= d1 / norm(d1)  # pb
-    #     jac_kinematics[2*k-1, xi[k][4:5]] .= -d1 / norm(d1) # p1
+        jac_kinematics[2*k-1, xi[k][1:2]] .= d1 / norm(d1)  # pb
+        jac_kinematics[2*k-1, xi[k][4:5]] .= -d1 / norm(d1) # p1
 
-    #     jac_kinematics[2*k, xi[k][1:2]] .= d2 / norm(d2)    # pb
-    #     jac_kinematics[2*k, xi[k][6:7]] .= -d2 / norm(d2)   # p2
-    # end
+        jac_kinematics[2*k, xi[k][1:2]] .= d2 / norm(d2)    # pb
+        jac_kinematics[2*k, xi[k][6:7]] .= -d2 / norm(d2)   # p2
+    end
 
     # # jac_self_collision
     # # for k = 1:N
