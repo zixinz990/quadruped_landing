@@ -110,7 +110,15 @@ The following arguments are sent to Ipopt
 function solve(x0,prob::HybridNLP;
         tol=1.0e-6,c_tol=1.0e-6,max_iter=700)
     n_nlp, m_nlp = num_primals(prob), num_duals(prob)
+    N = prob.N
+
     x_l, x_u = fill(-Inf,n_nlp), fill(+Inf,n_nlp)
+
+    # lower bound of body position, should always above the ground
+    for k = 1:N
+        x_l[2+18*(k-1)] = 0.0 # yb >= 0
+    end
+
     c_l, c_u = prob.lb, prob.ub
 
     println("Creating NLP Block Data...")
