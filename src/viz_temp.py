@@ -7,6 +7,8 @@ if not os.path.exists('../results'):
 video_writer = imageio.get_writer("../results/pc_video.mp4", fps=10)
 
 data = np.genfromtxt('data.csv', delimiter=',')
+data = data[:-14]
+data = data.reshape((-1,18))
 lb = 1
 for i in range(data.shape[0]):
     frame = data[i]
@@ -21,6 +23,7 @@ for i in range(data.shape[0]):
     plt.scatter(frame[3], frame[4], c='g')
     plt.scatter(frame[5], frame[6], c='b')
     plt.ylim(-1,1)
+    plt.xlim(-1, 0.5)
     plt.savefig('../results/temp.jpg')
     plt.cla()
     plt.clf()
