@@ -58,14 +58,23 @@ function contact_init_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     N = nlp.N
     init_mode = nlp.init_mode
 
+    # for k = 1:N
+    #     x = Z[xi[k]]
+    #     if init_mode == 1
+    #         d[2*k-1] = x[4] # x1 = 0
+    #         d[2*k] = x[5]   # y1 = 0
+    #     else
+    #         d[2*k-1] = x[6] # x2 = 0
+    #         d[2*k] = x[7]   # y2 = 0
+    #     end
+    # end
+
     for k = 1:N
         x = Z[xi[k]]
         if init_mode == 1
-            d[2*k-1] = x[4] # x1 = 0
-            d[2*k] = x[5]   # y1 = 0
+            d[k] = x[5]   # y1 = 0
         else
-            d[2*k-1] = x[6] # x2 = 0
-            d[2*k] = x[7]   # y2 = 0
+            d[k] = x[7]   # y2 = 0
         end
     end
 
@@ -162,7 +171,7 @@ function eval_c!(nlp::HybridNLP, c, Z)
     c[nlp.cinds[1]] .= Z[xi[1]] - nlp.x0
     c[nlp.cinds[2]] .= Z[xi[end]] - nlp.xf
     dynamics_constraint!(nlp, c, Z)
-    # contact_init_constraints!(nlp, c, Z)
+    contact_init_constraints!(nlp, c, Z)
     # contact_another_constraints!(nlp, c, Z)
     # kinematics_constraints!(nlp, c, Z)
     # self_collision_constraints!(nlp, c, Z)
@@ -232,7 +241,7 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     jac_init = view(jac, nlp.cinds[1], xi[1])
     jac_term = view(jac, nlp.cinds[2], xi[end])
     jac_dynamics = view(jac, nlp.cinds[3], :)
-    # jac_contact_init = view(jac, nlp.cinds[4], :)
+    jac_contact_init = view(jac, nlp.cinds[4], :)
     # jac_contact_another = view(jac, nlp.cinds[5], :)
     # jac_kinematics = view(jac, nlp.cinds[6], :)
     # # jac_self_collision = view(jac, nlp.cinds[7], :)
@@ -243,7 +252,7 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     # jac_dynamics
     dynamics_jacobian!(nlp, jac, Z)
 
-    # # jac_contact_init
+    # jac_contact_init
     # if init_mode == 1
     #     for k = 1:N
     #         jac_contact_init[2*k-1, xi[k][4]] = 1.0 # x1
@@ -255,6 +264,16 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     #         jac_contact_init[2*k, xi[k][7]] = 1.0   # y2
     #     end
     # end
+
+    if init_mode == 1
+        for k = 1:N
+            jac_contact_init[k, xi[k][5]] = 1.0   # y1
+        end
+    else
+        for k = 1:N
+            jac_contact_init[k, xi[k][7]] = 1.0   # y2
+        end
+    end
 
     # # jac_contact_another
     # if init_mode == 1
