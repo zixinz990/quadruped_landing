@@ -9,7 +9,7 @@ video_writer = imageio.get_writer("../results/pc_video.mp4", fps=10)
 data = np.genfromtxt('data.csv', delimiter=',')
 data = data[:-14]
 data = data.reshape((-1,18))
-lb = 1
+lb = 0.5
 for i in range(data.shape[0]):
     frame = data[i]
     theta = frame[2]
