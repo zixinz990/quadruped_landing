@@ -84,7 +84,9 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         c_kin_inds = (c_other_contact_inds[end]+1):(c_other_contact_inds[end]+2*N)                      # kinematic constraints (2 per time step)
         # c_col_inds = (c_kin_inds[end]+1):(c_kin_inds[end]+N)                                            # self-collision constraints (1 per time step)
         
-        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_other_contact_inds, c_kin_inds]
+        # cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_other_contact_inds, c_kin_inds]
+        cinds = [c_init_inds, c_term_inds, c_dyn_inds]
+
         m_nlp = c_kin_inds[end]  # total number of constraints
 
         # Constraints bounds
