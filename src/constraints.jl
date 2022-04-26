@@ -13,7 +13,6 @@ function dynamics_constraint!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     model = nlp.model
     init_mode = nlp.init_mode
     N = nlp.N
-    dt = nlp.times[2]
     k_trans = nlp.k_trans
 
     d = reshape(view(c, nlp.cinds[3]), (n, N - 1)) # size = n * (N-1)
@@ -28,18 +27,18 @@ function dynamics_constraint!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
 
         if k < k_trans - 1  # in mode 1 or 2
             if init_mode == 1
-                d[:, k] .= contact1_dynamics_rk4(model, x, u, dt) - x_next
+                d[:, k] .= contact1_dynamics_rk4(model, x, u) - x_next
             else
-                d[:, k] .= contact2_dynamics_rk4(model, x, u, dt) - x_next
+                d[:, k] .= contact2_dynamics_rk4(model, x, u) - x_next
             end
         elseif k == k_trans - 1  # before transition, jump!
             if init_mode == 1
-                d[:, k] .= jump1_map(contact1_dynamics_rk4(model, x, u, dt)) - x_next
+                d[:, k] .= jump1_map(contact1_dynamics_rk4(model, x, u)) - x_next
             else
-                d[:, k] .= jump2_map(contact2_dynamics_rk4(model, x, u, dt)) - x_next
+                d[:, k] .= jump2_map(contact2_dynamics_rk4(model, x, u)) - x_next
             end
         else  # in mode 3
-            d[:, k] .= contact3_dynamics_rk4(model, x, u, dt) - x_next
+            d[:, k] .= contact3_dynamics_rk4(model, x, u) - x_next
         end
     end
 
