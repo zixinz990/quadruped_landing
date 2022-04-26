@@ -106,7 +106,8 @@ function contact_another_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     # end
 
     for k = 1:N-k_trans+1
-        x = Z[xi[k]]
+        i = k + k_trans - 1
+        x = Z[xi[i]]
         if init_mode == 1
             d[k] = x[7]   # y2 = 0
         else

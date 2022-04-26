@@ -26,8 +26,8 @@ function reference_trajectory(model::PlanarQuadruped, times, t_trans, xinit, xte
     Xref = zeros(n,N)
     Uref = zeros(m,N)
 
-    Xref[:, 1] .= xinit
-    Xref[:, 2:end] .= xterm
+    # Xref[:, 1] .= xinit
+    Xref[:, 1:end] .= xterm
 
     # a = 2 * Δx[4:7] / (t_trans^2) # acceleration of feet (assume feet have constant acceleration and zero velocity since touching the ground)
 

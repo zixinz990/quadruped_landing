@@ -108,7 +108,7 @@ The following arguments are sent to Ipopt
 * `max_iter`: maximum number of solver iterations
 """
 function solve(x0, prob::HybridNLP;
-    tol=1.0e-6, c_tol=1.0e-6, max_iter=1000)
+    tol=1.0e-6, c_tol=1.0e-6, max_iter=700)
     n_nlp, m_nlp = num_primals(prob), num_duals(prob)
     N = prob.N
 
@@ -139,7 +139,7 @@ function solve(x0, prob::HybridNLP;
     solver.options["max_iter"] = max_iter
     solver.options["tol"] = tol
     solver.options["constr_viol_tol"] = c_tol
-    # solver.options["print_level"] = 4
+    solver.options["print_level"] = 8
 
     x = MOI.add_variables(solver, n_nlp)
 
