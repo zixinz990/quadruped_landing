@@ -23,8 +23,8 @@ function reference_trajectory(model::PlanarQuadruped, times, t_trans, xinit, xte
         end
     end
 
-    Xref = zeros(n,N)
-    Uref = zeros(m,N)
+    Xref = zeros(n, N)
+    Uref = zeros(m, N)
 
     # Xref[:, 1] .= xinit
     Xref[:, 1:end] .= xterm
@@ -36,11 +36,11 @@ function reference_trajectory(model::PlanarQuadruped, times, t_trans, xinit, xte
     # end
 
     if init_mode == 1
-        Uref[2, :] .= mb*g/2           # F1_y
-        Uref[4, k_trans:end] .= mb*g/2 # F2_y
+        Uref[2, :] .= mb * g / 2           # F1_y
+        Uref[4, k_trans:end] .= mb * g / 2 # F2_y
     else
-        Uref[2, k_trans:end] .= mb*g/2 # F1_y
-        Uref[4, :] .= mb*g/2           # F2_y
+        Uref[2, k_trans:end] .= mb * g / 2 # F1_y
+        Uref[4, :] .= mb * g / 2           # F2_y
     end
 
     # Convert to a trajectory

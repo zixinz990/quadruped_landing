@@ -30,25 +30,25 @@ Creates a `QuadraticCost` cost function of the form:
 \frac{1}{2} (x^T - x_f) Q (x - x_f) + \frac{1}{2} (u^T - u_f) R (u - u_f)
 ```
 """
-function LQRCost(Q::AbstractMatrix, R::AbstractMatrix, xf, uf=zeros(size(R,1)))
-    n,m = length(xf), length(uf)
+function LQRCost(Q::AbstractMatrix, R::AbstractMatrix, xf, uf=zeros(size(R, 1)))
+    n, m = length(xf), length(uf)
     Q = Diagonal(SVector{n}(diag(Q)))
     R = Diagonal(SVector{m}(diag(R)))
-    q = -Q*xf
-    r = -R*uf
-    c = 0.5*xf'Q*xf + 0.5*uf'R*uf
+    q = -Q * xf
+    r = -R * uf
+    c = 0.5 * xf'Q * xf + 0.5 * uf'R * uf
     T = promote_type(eltype(Q), eltype(R), eltype(xf), eltype(uf))
     QuadraticCost{n,m,T}(Q, R, SVector{n}(q), SVector{m}(r), c)
 end
 
 function stagecost(cost::QuadraticCost, x, u)
-    Q,R,q,r,c = cost.Q, cost.R, cost.q, cost.r, cost.c
-    return 0.5*x'Q*x + q'x + 0.5*u'R*u + r'u + c
+    Q, R, q, r, c = cost.Q, cost.R, cost.q, cost.r, cost.c
+    return 0.5 * x'Q * x + q'x + 0.5 * u'R * u + r'u + c
 end
 
 function termcost(cost::QuadraticCost, x, u=nothing)
-    Q,R,q,r,c = cost.Q, cost.R, cost.q, cost.r, cost.c
-    return 0.5*x'Q*x + q'x + c 
+    Q, R, q, r, c = cost.Q, cost.R, cost.q, cost.r, cost.c
+    return 0.5 * x'Q * x + q'x + c
 end
 
 function cost(obj::Vector{<:QuadraticCost{n,m,T}}, X, U) where {n,m,T}

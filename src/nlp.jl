@@ -52,14 +52,14 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
     use_sparse_jacobian::Bool
     blocks::BlockViews
     function HybridNLP(model, obj::Vector{<:QuadraticCost{n,m}}, init_mode::Integer,
-            tf::Real, N::Integer, x0::AbstractVector, xf::AbstractVector,
-            integration::Type{<:QuadratureRule}=RK4; use_sparse_jacobian::Bool=false
-        ) where {n,m}
+        tf::Real, N::Integer, x0::AbstractVector, xf::AbstractVector,
+        integration::Type{<:QuadratureRule}=RK4; use_sparse_jacobian::Bool=false
+    ) where {n,m}
         # Create indices
-        xinds = [SVector{n}((k-1)*(n+m) .+ (1:n)) for k = 1:N]
-        uinds = [SVector{m}((k-1)*(n+m) .+ (n+1:n+m)) for k = 1:N-1]
+        xinds = [SVector{n}((k - 1) * (n + m) .+ (1:n)) for k = 1:N]
+        uinds = [SVector{m}((k - 1) * (n + m) .+ (n+1:n+m)) for k = 1:N-1]
         times = collect(range(0, tf, length=N))
-        
+
         # Contact schedule
         modes = map(1:N) do k
             (times[k] < t_trans) ? init_mode : 3
@@ -74,14 +74,14 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
                 break
             end
         end
-        
+
         # Equality constraints
         c_init_inds = 1:n                                                                          # initial constraint
         c_term_inds = (c_init_inds[end]+1):(c_init_inds[end]+n)                                    # terminal constraint
         c_dyn_inds = (c_term_inds[end]+1):(c_term_inds[end]+(N-1)*n)                               # dynamics constraints       
         c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+N)                              # contact constraints of the initial mode (2 per time step)
         c_other_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+N-k_trans+1) # contact constraints of another leg (2 per time step)
-        
+
         # Inequality constraints        
         c_body_pos_inds = (c_other_contact_inds[end]+1):(c_other_contact_inds[end]+N)              # body position constraints
 
@@ -97,22 +97,22 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         ub[c_body_pos_inds] .= Inf
         # ub[c_kin_inds] .= model.l1 + model.l2 + model.lb/2
 
-        n_nlp = n*N + (N-1)*m
+        n_nlp = n * N + (N - 1) * m
         zL = fill(-Inf, n_nlp)
         zU = fill(+Inf, n_nlp)
         rows = Int[]
         cols = Int[]
         blocks = BlockViews(m_nlp, n_nlp)
-        
-        new{n,m,typeof(model), integration}(
+
+        new{n,m,typeof(model),integration}(
             model, obj,
             N, Nmodes, init_mode, t_trans, k_trans, tf, x0, xf, times, modes,
             xinds, uinds, cinds, lb, ub, zL, zU, rows, cols, use_sparse_jacobian, blocks
         )
     end
 end
-Base.size(nlp::HybridNLP{n,m}) where {n,m} = (n,m,nlp.N)
-num_primals(nlp::HybridNLP{n,m}) where {n,m} = n*nlp.N + m*(nlp.N-1)
+Base.size(nlp::HybridNLP{n,m}) where {n,m} = (n, m, nlp.N)
+num_primals(nlp::HybridNLP{n,m}) where {n,m} = n * nlp.N + m * (nlp.N - 1)
 num_duals(nlp::HybridNLP) = nlp.cinds[end][end]
 
 """

@@ -1,4 +1,6 @@
-import Pkg; Pkg.activate(joinpath(@__DIR__,"..")); Pkg.instantiate()
+import Pkg;
+Pkg.activate(joinpath(@__DIR__, ".."));
+Pkg.instantiate();
 using LinearAlgebra
 using ForwardDiff
 using RobotDynamics
@@ -28,24 +30,24 @@ include("constraints.jl")
 #     l2::Float64 = 0.3   # calf length
 # end
 model = PlanarQuadruped()
-mb = 10.0 
+mb = 10.0
 g = -9.81
 
 x0 = [-0.5; 0.3; -0.5; 0; 0; -1; 0.2; 0; -0.3; 0; 0; 0; 0; -0.3]
-u1 = [0; -mb*g/2; 0; 0]
-u2 = [0; -mb*g/2 + 30; 0; -mb*g/2 + 30]
+u1 = [0; -mb * g / 2; 0; 0]
+u2 = [0; -mb * g / 2 + 30; 0; -mb * g / 2 + 30]
 
 T = 100
 h = 0.05
 X = zeros(T, size(x0)[1])
-X[1,:] .= x0
+X[1, :] .= x0
 global on_the_ground_flag = false
 global u = u1
 for i = 1:T-1
     if on_the_ground_flag
-        solution = contact3_dynamics_rk4(model, X[i,:], u, h)
+        solution = contact3_dynamics_rk4(model, X[i, :], u, h)
     else
-        solution = contact1_dynamics_rk4(model, X[i,:], u, h)
+        solution = contact1_dynamics_rk4(model, X[i, :], u, h)
     end
     if solution[7] < 0
         solution = jump1_map(solution)
@@ -55,4 +57,4 @@ for i = 1:T-1
     X[i+1, :] .= solution
 end
 
-writedlm( "data.csv",  X, ',')
+writedlm("data.csv", X, ',')

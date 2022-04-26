@@ -10,7 +10,7 @@ and dimensions. Can be created from contiguous pairs of indices.
 struct BlockID
     row::Int
     col::Int
-    m::Int  
+    m::Int
     n::Int
 end
 Base.length(block::BlockID) = block.m * block.n
@@ -21,11 +21,11 @@ BlockID(i1::Integer, i2::Integer) = BlockID(i1:i1, i2:i2)
 function BlockID(i1::UnitRange, i2::UnitRange)
     BlockID(i1[1], i2[1], length(i1), length(i2))
 end
- 
+
 function BlockID(i1::AbstractVector{<:Integer}, i2::AbstractVector{<:Integer})
     mblk = length(i1)
     nblk = length(i2)
-    if (i1[end] != i1[1] + mblk - 1) || (i2[end] != i2[1] + nblk -1)
+    if (i1[end] != i1[1] + mblk - 1) || (i2[end] != i2[1] + nblk - 1)
         @warn "Block indices should be contiguous."
     end
     BlockID(i1[1]:i1[end], i2[1]:i2[end])
@@ -78,11 +78,11 @@ mutable struct BlockViews
     end
 end
 
-getblock(blocks::BlockViews, v::AbstractVector, i1, i2) = 
+getblock(blocks::BlockViews, v::AbstractVector, i1, i2) =
     getblock(blocks, v, BlockID(i1, i2))
-getblock(blocks::BlockViews, v::AbstractVector, ::Colon, i2) = 
+getblock(blocks::BlockViews, v::AbstractVector, ::Colon, i2) =
     getblock(blocks, v, BlockID(1:blocks.m, i2))
-getblock(blocks::BlockViews, v::AbstractVector, i1, ::Colon) = 
+getblock(blocks::BlockViews, v::AbstractVector, i1, ::Colon) =
     getblock(blocks, v, BlockID(i1, 1:blocks.n))
 
 function getblock(blocks::BlockViews, v::AbstractVector, block::BlockID)
@@ -96,18 +96,18 @@ function getblock(blocks::BlockViews, v::AbstractVector, block::BlockID)
     reshape(vecview, block.m, block.n)
 end
 
-setblock!(blocks::BlockViews, i1::AbstractVector, i2::AbstractVector) = 
-    setblock!(blocks, BlockID(i1, i2)) 
+setblock!(blocks::BlockViews, i1::AbstractVector, i2::AbstractVector) =
+    setblock!(blocks, BlockID(i1, i2))
 
-setblock!(blocks::BlockViews, i1::Integer, i2::Integer) = 
-    setblock!(blocks, BlockID(i1:i1, i2:i2)) 
+setblock!(blocks::BlockViews, i1::Integer, i2::Integer) =
+    setblock!(blocks, BlockID(i1:i1, i2:i2))
 
 function setblock!(blocks::BlockViews, block::BlockID)
     if !haskey(blocks.blk2vec, block)
         inds = blocks.len .+ (1:length(block))
         blocks.blk2vec[block] = inds
         blocks.vec2blk[inds] = block
-        blocks.len += length(block) 
+        blocks.len += length(block)
         if (block.row + block.m - 1) > blocks.m || (block.col + block.n - 1) > blocks.n || block.m < 1 || block.n < 1
             i1 = block.row:block.m-1
             i2 = block.col:block.n-1
@@ -117,11 +117,11 @@ function setblock!(blocks::BlockViews, block::BlockID)
     return blocks
 end
 
-@inline Base.getindex(blocks::BlockViews, i1::AbstractVector, i2::AbstractVector) = 
-    blocks.blk2vec[BlockID(i1, i2)]    
+@inline Base.getindex(blocks::BlockViews, i1::AbstractVector, i2::AbstractVector) =
+    blocks.blk2vec[BlockID(i1, i2)]
 
 function findindexblock(blocks::BlockViews, i::Integer)
-    for (vec,blk) in pairs(blocks.vec2blk)
+    for (vec, blk) in pairs(blocks.vec2blk)
         if i ∈ vec
             return blk
         end
@@ -132,11 +132,11 @@ end
 function getrc(blocks::BlockViews)
     rc = Tuple{Int,Int}[]
     cnt = 1
-    for (vec,blk) in blocks.vec2blk  # OrderedDict ensures this iterates by insertion order
+    for (vec, blk) in blocks.vec2blk  # OrderedDict ensures this iterates by insertion order
         @assert vec[1] == cnt
         i1 = blk.row:blk.row+blk.m-1
         i2 = blk.col:blk.col+blk.n-1
-        carts = CartesianIndices((i1,i2))
+        carts = CartesianIndices((i1, i2))
         append!(rc, Tuple.(carts))
         cnt += length(vec)
     end
@@ -165,8 +165,8 @@ The vector can be cast to a sparse matrix:
 struct NonzerosVector{T,V} <: AbstractVector{T}
     data::V
     blocks::BlockViews
-    function NonzerosVector(vec::V, blocks::BlockViews) where V
-        new{eltype(V), V}(vec, blocks)
+    function NonzerosVector(vec::V, blocks::BlockViews) where {V}
+        new{eltype(V),V}(vec, blocks)
     end
 end
 Base.size(v::NonzerosVector) = size(v.data)
@@ -175,13 +175,13 @@ Base.IndexStyle(::NonzerosVector) = IndexLinear()
 @inline Base.setindex!(v::NonzerosVector, val, i::Integer) = v.data[i] = val
 
 function Base.setindex!(v::NonzerosVector, val, i1::AbstractVector, i2::AbstractVector)
-    blockview = getblock(v.blocks, v.data, i1, i2) 
+    blockview = getblock(v.blocks, v.data, i1, i2)
     blockview .= val
     return blockview
 end
 
-const IndexRange = Union{Colon, AbstractVector{<:Integer}, <:Integer}
-@inline Base.getindex(v::NonzerosVector, i1::IndexRange, i2::IndexRange) = view(v, i1, i2) 
+const IndexRange = Union{Colon,AbstractVector{<:Integer},<:Integer}
+@inline Base.getindex(v::NonzerosVector, i1::IndexRange, i2::IndexRange) = view(v, i1, i2)
 @inline Base.dotview(v::NonzerosVector, i1::IndexRange, i2::IndexRange) = view(v, i1, i2)
 function Base.view(v::NonzerosVector, i1::IndexRange, i2::IndexRange)
     blockview = getblock(v.blocks, v.data, i1, i2)

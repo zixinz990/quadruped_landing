@@ -2,21 +2,21 @@ using GeometryBasics
 using CoordinateTransformations, Rotations
 using RobotDynamics
 using Colors
-using StaticArrays 
+using StaticArrays
 using MeshCat
 using Blink
 using LinearAlgebra
 using TrajOptPlots
 
 Base.@kwdef struct PlanarQuadruped <: AbstractModel
-    g::Float64 = -9.81   # gravity
-    
+    g::Float64 = -9.81  # gravity
+
     mb::Float64 = 10.0  # body mass
     mf::Float64 = 0.1   # foot mass
 
     lb::Float64 = 0.5   # body length
-    l1::Float64 = 0.25   # thigh length
-    l2::Float64 = 0.25   # calf length
+    l1::Float64 = 0.25  # thigh length
+    l2::Float64 = 0.25  # calf length
 end
 
 RobotDynamics.state_dim(::PlanarQuadruped) = 14
@@ -27,13 +27,13 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     mb = model.mb
     lb = model.lb
     mf = model.mf
-    Ib = mb*lb^2 / 12
+    Ib = mb * lb^2 / 12
 
     # state = [pb, θ, vb, ω, p1, p2]
-    pb = x[1:2]   # body link position
-    θ  = x[3]     # body link orientation
-    p1 = x[4:5]   # foot 1 position
-    p2 = x[6:7]   # foot 2 poisition
+    pb = x[1:2]  # body link position
+    θ = x[3]     # body link orientation
+    p1 = x[4:5]  # foot 1 position
+    p2 = x[6:7]  # foot 2 poisition
 
     # vb = x[8:9]
     # w = x[10]
@@ -48,15 +48,15 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
 
     # x_dot[1:7] .= x[8:14]
     velocities = x[8:14]
-    
+
     # body_dynamics
-    temp_acc = (F1+F2) ./ mb
+    temp_acc = (F1 + F2) ./ mb
     # x_dot[8] = temp_acc[1]
     # x_dot[9] = temp_acc[2] + g
     body_acc_x = temp_acc[1]
     body_acc_y = temp_acc[2] + g
     # x_dot[8:9] .= (F1+F2) ./ mb
-    τF = -F1[1]*(p1[2]-pb[2]) + F1[2]*(p1[1]-pb[1]) - F2[1]*(p2[2]-pb[2]) + F2[2]*(p2[1]-pb[1])
+    τF = -F1[1] * (p1[2] - pb[2]) + F1[2] * (p1[1] - pb[1]) - F2[1] * (p2[2] - pb[2]) + F2[2] * (p2[1] - pb[1])
     # x_dot[10] = τF / Ib
     body_w = τF / Ib
 
@@ -70,7 +70,7 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_v; foot_2_v]
 
 
-        
+
     # # foot 1 should be on the ground
     # x_dot[4:5] .= 0
     # # choose contact mode: 2
@@ -84,7 +84,7 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
 
     # v̇b = (F1+F2)./mb .+ g
     # α = τF/Ib
-    
+
     # ẋ = [vb; ω; v̇b; α; v1; v2]
 
     return x_dot
@@ -95,13 +95,13 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
     mb = model.mb
     lb = model.lb
     mf = model.mf
-    Ib = mb*lb^2 / 12
+    Ib = mb * lb^2 / 12
 
     # state = [pb, θ, vb, ω, p1, p2]
-    pb = x[1:2]   # body link position
-    θ  = x[3]     # body link orientation
-    p1 = x[4:5]   # foot 1 position
-    p2 = x[6:7]   # foot 2 poisition
+    pb = x[1:2]  # body link position
+    θ = x[3]     # body link orientation
+    p1 = x[4:5]  # foot 1 position
+    p2 = x[6:7]  # foot 2 poisition
 
     # vb = x[8:9]
     # w = x[10]
@@ -119,14 +119,14 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
 
     # x_dot[1:7] .= x[8:14]
     velocities = x[8:14]
-    
+
     # body_dynamics
-    temp_acc = (F1+F2) ./ mb
+    temp_acc = (F1 + F2) ./ mb
     # x_dot[8] = temp_acc[1]
     # x_dot[9] = temp_acc[2] + g
     body_acc_x = temp_acc[1]
     body_acc_y = temp_acc[2] + g
-    τF = -F1[1]*(p1[2]-pb[2]) + F1[2]*(p1[1]-pb[1]) - F2[1]*(p2[2]-pb[2]) + F2[2]*(p2[1]-pb[1])
+    τF = -F1[1] * (p1[2] - pb[2]) + F1[2] * (p1[1] - pb[1]) - F2[1] * (p2[2] - pb[2]) + F2[2] * (p2[1] - pb[1])
     # x_dot[10] = τF / Ib
     body_w = τF / Ib
 
@@ -166,14 +166,14 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
     # p2[2] = 0.0    # foot 2 position in y = 0
     # v2[2] = 0.0    # foot 2 linear velocity in y = 0
     # F1 = zero(F1)  # foot 1 GRF = 0
-    
+
     # # dynamics
     # τF = -F1[1]*p1[2] + F1[2]*p1[1] - F2[1]*p2[2] + F2[2]*p2[1]
     # Ib = mb*lb^2 / 12
 
     # v̇b = (F1+F2)./mb .+ g
     # α = τF/Ib
-    
+
     # ẋ = [vb; ω; v̇b; α; v1; v2]
 
     return x_dot
@@ -184,13 +184,13 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     mb = model.mb
     lb = model.lb
     mf = model.mf
-    Ib = mb*lb^2 / 12
+    Ib = mb * lb^2 / 12
 
     # state = [pb, θ, vb, ω, p1, p2]
-    pb = x[1:2]   # body link position
-    θ  = x[3]     # body link orientation
-    p1 = x[4:5]   # foot 1 position
-    p2 = x[6:7]   # foot 2 poisition
+    pb = x[1:2]  # body link position
+    θ = x[3]     # body link orientation
+    p1 = x[4:5]  # foot 1 position
+    p2 = x[6:7]  # foot 2 poisition
 
     # vb = x[8:9]
     # w = x[10]
@@ -208,14 +208,14 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     velocities = x[8:14]
 
     # x_dot[1:7] .= x[8:14]
-    
+
     # body_dynamics
-    temp_acc = (F1+F2) ./ mb
+    temp_acc = (F1 + F2) ./ mb
     # x_dot[8] = temp_acc[1]
     # x_dot[9] = temp_acc[2] + g
     body_acc_x = temp_acc[1]
     body_acc_y = temp_acc[2] + g
-    τF = -F1[1]*(p1[2]-pb[2]) + F1[2]*(p1[1]-pb[1]) - F2[1]*(p2[2]-pb[2]) + F2[2]*(p2[1]-pb[1])
+    τF = -F1[1] * (p1[2] - pb[2]) + F1[2] * (p1[1] - pb[1]) - F2[1] * (p2[2] - pb[2]) + F2[2] * (p2[1] - pb[1])
     # x_dot[10] = τF / Ib
     body_w = τF / Ib
     foot_1_v = zeros(2)
@@ -261,7 +261,7 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
 
     # v̇b = (F1+F2)./mb .+ g
     # α = τF/Ib
-    
+
     # ẋ = [vb; ω; v̇b; α; v1; v2]
 
     return x_dot
@@ -270,28 +270,28 @@ end
 function contact1_dynamics_rk4(model, x, u, h)
     # RK4 integration with zero-order hold on u
     f1 = contact1_dynamics(model, x, u)
-    f2 = contact1_dynamics(model, x + 0.5*h*f1, u)
-    f3 = contact1_dynamics(model, x + 0.5*h*f2, u)
-    f4 = contact1_dynamics(model, x + h*f3, u)
-    return x + (h/6.0)*(f1 + 2*f2 + 2*f3 + f4)
+    f2 = contact1_dynamics(model, x + 0.5 * h * f1, u)
+    f3 = contact1_dynamics(model, x + 0.5 * h * f2, u)
+    f4 = contact1_dynamics(model, x + h * f3, u)
+    return x + (h / 6.0) * (f1 + 2 * f2 + 2 * f3 + f4)
 end
 
 function contact2_dynamics_rk4(model, x, u, h)
     # RK4 integration with zero-order hold on u
     f1 = contact2_dynamics(model, x, u)
-    f2 = contact2_dynamics(model, x + 0.5*h*f1, u)
-    f3 = contact2_dynamics(model, x + 0.5*h*f2, u)
-    f4 = contact2_dynamics(model, x + h*f3, u)
-    return x + (h/6.0)*(f1 + 2*f2 + 2*f3 + f4)
+    f2 = contact2_dynamics(model, x + 0.5 * h * f1, u)
+    f3 = contact2_dynamics(model, x + 0.5 * h * f2, u)
+    f4 = contact2_dynamics(model, x + h * f3, u)
+    return x + (h / 6.0) * (f1 + 2 * f2 + 2 * f3 + f4)
 end
 
 function contact3_dynamics_rk4(model, x, u, h)
     # RK4 integration with zero-order hold on u
     f1 = contact3_dynamics(model, x, u)
-    f2 = contact3_dynamics(model, x + 0.5*h*f1, u)
-    f3 = contact3_dynamics(model, x + 0.5*h*f2, u)
-    f4 = contact3_dynamics(model, x + h*f3, u)
-    return x + (h/6.0)*(f1 + 2*f2 + 2*f3 + f4)
+    f2 = contact3_dynamics(model, x + 0.5 * h * f1, u)
+    f3 = contact3_dynamics(model, x + 0.5 * h * f2, u)
+    f4 = contact3_dynamics(model, x + h * f3, u)
+    return x + (h / 6.0) * (f1 + 2 * f2 + 2 * f3 + f4)
 end
 
 function contact1_jacobian(model::PlanarQuadruped, x, u, dt)
@@ -317,15 +317,15 @@ end
 
 function jump1_map(x)
     # from mode 1 to 3
-    xn = [x[1:4]; 0.0; x[6]; 0.0 ; x[8:10]; zeros(4)]
+    xn = [x[1:4]; 0.0; x[6]; 0.0; x[8:10]; zeros(4)]
     return xn
 end
 
 function jump2_map(x)
     # from mode 2 to 3
-    xn = [x[1:4]; 0.0; x[6]; 0.0 ; x[8:10]; zeros(4)]
+    xn = [x[1:4]; 0.0; x[6]; 0.0; x[8:10]; zeros(4)]
     return xn
 end
 
-jump1_jacobian() = Diagonal(SA[1,1,1,1, 0 ,1, 0 ,1,1,1, 0,0,0,0])
-jump1_jacobian() = Diagonal(SA[1,1,1,1, 0 ,1, 0 ,1,1,1, 0,0,0,0])
+jump1_jacobian() = Diagonal(SA[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0])
+jump1_jacobian() = Diagonal(SA[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0])
