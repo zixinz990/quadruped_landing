@@ -147,9 +147,8 @@ Calculate the kinematics constraints.
 function kinematics_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     d = view(c, nlp.cinds[7])
 
-    xi, ui = nlp.xinds, nlp.uinds
+    xi = nlp.xinds
     N = nlp.N
-    init_mode = nlp.init_mode
 
     for k = 1:N
         x = Z[xi[k]]

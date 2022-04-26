@@ -96,8 +96,8 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         # ub[c_kin_inds] .= model.l1 + model.l2 + model.lb/2
 
         n_nlp = n*N + (N-1)*m
-        # zL = fill(-Inf, n_nlp)
-        # zU = fill(+Inf, n_nlp)
+        zL = fill(-Inf, n_nlp)
+        zU = fill(+Inf, n_nlp)
         rows = Int[]
         cols = Int[]
         blocks = BlockViews(m_nlp, n_nlp)
