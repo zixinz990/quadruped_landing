@@ -249,7 +249,7 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     # jac_kinematics = view(jac, nlp.cinds[7], :)
 
     jac_init .= I(n)
-    jac_term .= I(n)
+    jac_term .= I(n-1)
 
     # jac_dynamics
     dynamics_jacobian!(nlp, jac, Z)
