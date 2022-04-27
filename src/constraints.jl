@@ -53,7 +53,7 @@ Calculate the contact constraints of the initial mode for each time step.
 function contact_init_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     d = view(c, nlp.cinds[4])
 
-    xi, ui = nlp.xinds, nlp.uinds
+    xi = nlp.xinds
     N = nlp.N
     init_mode = nlp.init_mode
 
@@ -88,7 +88,7 @@ Calculate the contact constraints of another leg for each time step after transi
 function contact_another_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
     d = view(c, nlp.cinds[5])
 
-    xi, ui = nlp.xinds, nlp.uinds
+    xi = nlp.xinds
     N = nlp.N
     init_mode = nlp.init_mode
     k_trans = nlp.k_trans
@@ -198,7 +198,6 @@ function dynamics_jacobian!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     model = nlp.model
     init_mode = nlp.init_mode
     N = nlp.N
-    dt = nlp.times[2]
     k_trans = nlp.k_trans
 
     ci = 1:n
@@ -208,18 +207,18 @@ function dynamics_jacobian!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
 
         if k < k_trans - 1  # in mode 1 or 2
             if init_mode == 1
-                D[ci, [xi[k]; ui[k]]] .= contact1_jacobian(model, x, u, dt)
+                D[ci, [xi[k]; ui[k]]] .= contact1_jacobian(model, x, u)
             else
-                D[ci, [xi[k]; ui[k]]] .= contact2_jacobian(model, x, u, dt)
+                D[ci, [xi[k]; ui[k]]] .= contact2_jacobian(model, x, u)
             end
         elseif k == k_trans - 1  # before transition, jump!
             if init_mode == 1
-                D[ci, [xi[k]; ui[k]]] .= jump1_jacobian() * contact1_jacobian(model, x, u, dt)
+                D[ci, [xi[k]; ui[k]]] .= jump1_jacobian() * contact1_jacobian(model, x, u)
             else
-                D[ci, [xi[k]; ui[k]]] .= jump2_jacobian() * contact2_jacobian(model, x, u, dt)
+                D[ci, [xi[k]; ui[k]]] .= jump2_jacobian() * contact2_jacobian(model, x, u)
             end
         else  # in mode 3
-            D[ci, [xi[k]; ui[k]]] .= contact3_jacobian(model, x, u, dt)
+            D[ci, [xi[k]; ui[k]]] .= contact3_jacobian(model, x, u)
         end
 
         D[ci, xi[k+1]] .= -I(n)
@@ -238,7 +237,6 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     xi, ui = nlp.xinds, nlp.uinds
     N = nlp.N
     init_mode = nlp.init_mode
-    t_trans = nlp.t_trans
     k_trans = nlp.k_trans
 
     # Create views for each portion of the Jacobian

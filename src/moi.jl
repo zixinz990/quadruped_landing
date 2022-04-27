@@ -108,7 +108,7 @@ The following arguments are sent to Ipopt
 * `max_iter`: maximum number of solver iterations
 """
 function solve(x0, prob::HybridNLP;
-    tol=1.0e-6, c_tol=1.0e-6, max_iter=700)
+    tol=1.0e-6, c_tol=1.0e-6, max_iter=2000)
     n_nlp, m_nlp = num_primals(prob), num_duals(prob)
     N = prob.N
 
@@ -120,11 +120,15 @@ function solve(x0, prob::HybridNLP;
         # x_l[5+20*(k-1)] = 0.0 # y1 >= 0
         # x_l[7+20*(k-1)] = 0.0 # y2 >= 0
 
-        # lower bound of body orientation
+        # lower and upper bound of body orientation
         x_l[3+20*(k-1)] = -pi / 2 # theta >= -pi/2
-
-        # upper bound of body orientation
-        x_u[3+20*(k-1)] = pi / 2 # theta <= pi/2
+        x_u[3+20*(k-1)] = pi / 2  # theta <= pi/2
+        
+        if k < N
+            # lower bound and upper bound of dt
+            x_l[20+20*(k-1)] = 0.005 # dt >= 0.005
+            x_u[20+20*(k-1)] = 0.015 # dt <= 0.015
+        end
     end
 
     c_l, c_u = prob.lb, prob.ub

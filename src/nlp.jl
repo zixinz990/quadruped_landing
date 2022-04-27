@@ -9,7 +9,7 @@ The kth state and control can be extracted from the concatenated state vector `Z
 `Z[nlp.xinds[k]]`, and `Z[nlp.uinds[k]]`.
 
 # Constructor
-    HybridNLP(model, obj, tf, N, M, x0, xf, [integration])
+    HybridNLP(model, obj, init_mode, k_trans, N, x0, xf, integration; use_sparse_jacobian)
 
 # Basic Methods
     Base.size(nlp)    # returns (n,m,T)
@@ -33,12 +33,9 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
     N::Int                                   # number of knot points
     Nmodes::Int                              # number of modes
     init_mode::Int                           # the mode ID of the initial state
-    t_trans::Float64                         # the staet time of mode 3 (sec)
     k_trans::Int                             # the start index of mode 3
-    tf::Float64                              # total time (sec)
     x0::MVector{n,Float64}                   # initial condition
     xf::MVector{n,Float64}                   # final condition
-    times::Vector{Float64}                   # vector of times
     modes::Vector{Int}                       # mode ID
     xinds::Vector{SVector{n,Int}}            # Z[xinds[k]] gives states for time step k
     uinds::Vector{SVector{m,Int}}            # Z[uinds[k]] gives controls for time step k
@@ -51,29 +48,19 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
     cols::Vector{Int}                        # columns for Jacobian sparsity
     use_sparse_jacobian::Bool
     blocks::BlockViews
-    function HybridNLP(model, obj::Vector{<:QuadraticCost{n,m}}, init_mode::Integer,
-        tf::Real, N::Integer, x0::AbstractVector, xf::AbstractVector,
+    function HybridNLP(model, obj::Vector{<:QuadraticCost{n,m}}, init_mode::Integer, k_trans::Integer,
+        N::Integer, x0::AbstractVector, xf::AbstractVector,
         integration::Type{<:QuadratureRule}=RK4; use_sparse_jacobian::Bool=false
     ) where {n,m}
         # Create indices
         xinds = [SVector{n}((k - 1) * (n + m) .+ (1:n)) for k = 1:N]
         uinds = [SVector{m}((k - 1) * (n + m) .+ (n+1:n+m)) for k = 1:N-1]
-        times = collect(range(0, tf, length=N))
 
         # Contact schedule
         modes = map(1:N) do k
-            (times[k] < t_trans) ? init_mode : 3
+            (k < k_trans) ? init_mode : 3
         end
         Nmodes = 2
-
-        # Calculate k_trans
-        k_trans = 0
-        for k = 1:N-1
-            if times[k] < t_trans && times[k+1] >= t_trans
-                k_trans = k + 1
-                break
-            end
-        end
 
         # Equality constraints
         c_init_inds = 1:n                                                                          # initial constraint
@@ -106,7 +93,7 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
 
         new{n,m,typeof(model),integration}(
             model, obj,
-            N, Nmodes, init_mode, t_trans, k_trans, tf, x0, xf, times, modes,
+            N, Nmodes, init_mode, k_trans, x0, xf, modes,
             xinds, uinds, cinds, lb, ub, zL, zU, rows, cols, use_sparse_jacobian, blocks
         )
     end

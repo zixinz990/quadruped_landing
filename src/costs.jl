@@ -8,7 +8,8 @@ function eval_f(nlp::HybridNLP, Z)
     xi, ui = nlp.xinds, nlp.uinds
     for k = 1:nlp.N-1
         x, u = Z[xi[k]], Z[ui[k]]
-        J += stagecost(nlp.obj[k], x, u)
+        hk = u[end]
+        J += hk * stagecost(nlp.obj[k], x, u)
     end
     J += termcost(nlp.obj[end], Z[xi[end]])
     return J
@@ -24,8 +25,9 @@ function grad_f!(nlp::HybridNLP{n,m}, grad, Z) where {n,m}
     obj = nlp.obj
     for k = 1:nlp.N-1
         x, u = Z[xi[k]], Z[ui[k]]
-        grad[xi[k]] = obj[k].Q * x + obj[k].q
-        grad[ui[k]] = obj[k].R * u + obj[k].r
+        hk = u[end]
+        grad[xi[k]] = hk * (obj[k].Q * x + obj[k].q)
+        grad[ui[k]] = hk * (obj[k].R * u + obj[k].r)
     end
     grad[xi[end]] = obj[end].Q * Z[xi[end]] + obj[end].q
     return nothing
