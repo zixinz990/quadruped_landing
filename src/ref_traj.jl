@@ -10,7 +10,7 @@ function reference_trajectory(model::PlanarQuadruped, N, k_trans, xterm, init_mo
     g, mb = model.g, model.mb
 
     Xref = zeros(n, N)
-    Uref = zeros(m, N)
+    Uref = zeros(m, N-1)
 
     # initialize Xref
     Xref[:, 1:end] .= xterm
