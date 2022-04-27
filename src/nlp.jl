@@ -64,7 +64,7 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
 
         # Equality constraints
         c_init_inds = 1:n                                                                          # initial constraint
-        c_term_inds = (c_init_inds[end]+1):(c_init_inds[end]+n)                                    # terminal constraint
+        c_term_inds = (c_init_inds[end]+1):(c_init_inds[end]+n-1)                                  # terminal constraint
         c_dyn_inds = (c_term_inds[end]+1):(c_term_inds[end]+(N-1)*n)                               # dynamics constraints       
         c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+N)                              # contact constraints of the initial mode (2 per time step)
         c_other_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+N-k_trans+1) # contact constraints of another leg (2 per time step)
