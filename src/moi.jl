@@ -126,8 +126,8 @@ function solve(x0, prob::HybridNLP;
         
         if k < N
             # lower bound and upper bound of dt
-            x_l[20+20*(k-1)] = 0.005 # dt >= 0.005
-            x_u[20+20*(k-1)] = 0.015 # dt <= 0.015
+            x_l[20+20*(k-1)] = 0.005 # dt >= 0.008
+            x_u[20+20*(k-1)] = 0.015 # dt <= 0.012
         end
     end
 
@@ -143,7 +143,7 @@ function solve(x0, prob::HybridNLP;
     solver.options["max_iter"] = max_iter
     solver.options["tol"] = tol
     solver.options["constr_viol_tol"] = c_tol
-    solver.options["print_level"] = 8
+    # solver.options["print_level"] = 8
 
     x = MOI.add_variables(solver, n_nlp)
 
