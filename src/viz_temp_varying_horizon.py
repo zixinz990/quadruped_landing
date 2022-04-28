@@ -64,7 +64,9 @@ for i in tqdm.tqdm(range(data.shape[0])):
     rear_x = com[0] - np.cos(theta) * lb / 2
     rear_y = com[1] - np.sin(theta) * lb / 2
     plt.scatter(frame[0], frame[1], c='r')
-    plt.plot([rear_x, front_x], [rear_y, front_y])
+    plt.plot([rear_x, front_x], [rear_y, front_y], c='b')
+    plt.plot([frame[3], com[0]], [frame[4], com[1]], c='b')
+    plt.plot([frame[5], com[0]], [frame[6], com[1]], c='b')
     plt.scatter(frame[3], frame[4], c='g')
     plt.scatter(frame[5], frame[6], c='b')
     plt.plot([-1, 0.5], [0, 0], c='k')  # plot the floor
