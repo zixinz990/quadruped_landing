@@ -224,4 +224,4 @@ function jump2_map(x)
 end
 
 jump1_jacobian() = Diagonal(SA[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0])
-jump1_jacobian() = Diagonal(SA[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0])
+jump2_jacobian() = Diagonal(SA[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0])

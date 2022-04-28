@@ -18,14 +18,14 @@ g = -9.8
 force_scale = 0.002
 video_writer = imageio.get_writer("../results/pc_video.mp4", fps=60)
 
-data = np.genfromtxt('data_optimal_solution_found_1.csv', delimiter=',')
+data = np.genfromtxt('data_1.csv', delimiter=',')
 data = data[:-15]
 data = data.reshape((-1, 20))
-times = data[:,14]
+times = data[:, 14]
 plot_t = np.arange(0, times[-1], dt)
 plot_data = []
 for i in range(20):
-    f = interp1d(times, data[:,i], kind='linear')
+    f = interp1d(times, data[:, i], kind='linear')
     interp_data = f(plot_t)
     plot_data.append(interp_data)
 plot_data = np.array(plot_data).transpose()
@@ -33,7 +33,7 @@ data = plot_data
 
 if free_fall:
     free_fall_time_step = 100
-    initial_state = data[0,:]
+    initial_state = data[0, :]
     initial_state[15:] = 0
     additional_data = []
     v = initial_state[7:9]
@@ -69,12 +69,14 @@ for i in tqdm.tqdm(range(data.shape[0])):
     plt.plot([frame[5], com[0]], [frame[6], com[1]], c='b')
     plt.scatter(frame[3], frame[4], c='g')
     plt.scatter(frame[5], frame[6], c='b')
-    plt.plot([-1, 0.5], [0, 0], c='k')  # plot the floor
+    # plt.plot([-1, 0.5], [0, 0], c='k')  # plot the floor
+    plt.plot([-0.5, 1], [0, 0], c='k')  # plot the floor
     plt.ylim(-0.1, 2)
-    plt.xlim(-1, 0.5)
+    # plt.xlim(-1, 0.5)
+    plt.xlim(-0.5, 1)
     if plot_force:
-        plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + frame[16]* force_scale], c='r')
-        plt.plot([frame[5], frame[5] + frame[17]* force_scale], [frame[6], frame[6] + frame[18]* force_scale], c='r')
+        plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + frame[16] * force_scale], c='r')
+        plt.plot([frame[5], frame[5] + frame[17] * force_scale], [frame[6], frame[6] + frame[18] * force_scale], c='r')
     plt.savefig('../results/temp.jpg')
     plt.cla()
     plt.clf()
