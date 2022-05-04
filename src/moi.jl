@@ -126,9 +126,14 @@ function solve(x0, prob::HybridNLP;
         
         if k < N
             # lower bound and upper bound of dt
-            x_l[20+20*(k-1)] = 0.001
-            x_u[20+20*(k-1)] = 0.009
+            x_l[20+20*(k-1)] = 0.0001
+            x_u[20+20*(k-1)] = 0.006
         end
+    end
+
+    for k = k_trans:N-1
+        x_l[17+20*(k-1)] = 0.0
+        x_l[19+20*(k-1)] = 0.0
     end
 
     c_l, c_u = prob.lb, prob.ub

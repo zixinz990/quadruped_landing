@@ -58,10 +58,13 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     foot_1_a = zeros(2)
 
     # foot 2 dynamics
-    foot_2_a = -F2 ./ mf
+    temp_foot_2_a = -F2 ./ mf
+
+    foot_2_ax = temp_foot_2_a[1]
+    foot_2_ay = temp_foot_2_a[2] + g
 
     x_dot = zeros(length(x))
-    x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
+    x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_ax; foot_2_ay]
 
     return x_dot
 end
@@ -96,13 +99,16 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
     body_w = τF / Ib
 
     # foot 1 dynamics
-    foot_1_a = -F1 ./ mf
+    temp_foot_1_a = -F1 ./ mf
+
+    foot_1_ax = temp_foot_1_a[1]
+    foot_1_ay = temp_foot_1_a[2] + g
 
     # foot 2 constraints
     foot_2_a = zeros(2)
 
     x_dot = zeros(length(x))
-    x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
+    x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_ax; foot_1_ay; foot_2_a]
 
     return x_dot
 end
