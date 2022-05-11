@@ -62,8 +62,8 @@ function solve(x0, prob::HybridNLP;
         
         if k < N
             # lower bound and upper bound of dt
-            x_l[20+20*(k-1)] = 0.0001
-            x_u[20+20*(k-1)] = 0.006
+            x_l[20+20*(k-1)] = 0.0005
+            x_u[20+20*(k-1)] = 0.009
         end
     end
 
