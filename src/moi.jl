@@ -29,73 +29,8 @@ end
 
 MOI.initialize(prob::HybridNLP, features) = nothing
 function MOI.jacobian_structure(nlp::HybridNLP)
-    # if nlp.use_sparse_jacobian
-    #     initialize_sparsity!(nlp)
-    #     getrc(nlp.blocks)
-    # else
-    #     vec(Tuple.(CartesianIndices(zeros(num_duals(nlp), num_primals(nlp)))))
-    # end
     vec(Tuple.(CartesianIndices(zeros(num_duals(nlp), num_primals(nlp)))))
 end
-
-
-# function initialize_sparsity!(nlp::HybridNLP{n,m}) where {n,m}
-#     blocks = nlp.blocks
-
-#     # Some useful variables
-#     xi, ui = nlp.xinds, nlp.uinds
-#     model = nlp.model
-#     N = nlp.N                      # number of time steps
-#     M = nlp.M                      # time steps per mode
-#     Nmodes = nlp.Nmodes            # number of mode sequences (N ÷ M)
-
-#     Nt = nlp.N
-#     Nx, Nu = n, m
-#     dt = nlp.times[2]
-#     Nm = nlp.M
-
-
-#     ic = (1:n) .+ (nlp.cinds[3][1] - 1)
-#     for k = 1:(Nmodes-1)
-#         for j = 1:(Nm-1)
-#             s = (k - 1) * Nm + j
-#             zi = [xi[s]; ui[s]]
-#             setblock!(blocks, ic, zi)
-#             setblock!(blocks, ic, xi[s+1])
-#             ic = ic .+ n
-#         end
-#         s = k * Nm
-#         zi = [xi[s]; ui[s]]
-#         setblock!(blocks, ic, zi)
-#         setblock!(blocks, ic, xi[s+1])
-#         ic = ic .+ n
-#     end
-#     for j = 1:(Nm-1)
-#         s = (Nmodes - 1) * Nm + j
-#         zi = [xi[s]; ui[s]]
-#         setblock!(blocks, ic, zi)
-#         setblock!(blocks, ic, xi[s+1])
-
-#         ic = ic .+ n
-#     end
-
-#     setblock!(blocks, nlp.cinds[1], xi[1])
-#     setblock!(blocks, nlp.cinds[2], xi[end])
-
-#     t = 1
-#     for k = 1:nlp.N
-
-#         # stance constraint
-#         foot_ind = nlp.modes[k] == 1 ? 4 : 6
-#         setblock!(blocks, t + nlp.cinds[4][1] - 1, xi[k][foot_ind])
-
-#         # length constraint
-#         setblock!(blocks, nlp.cinds[5][1] - 1 + 2 * (k - 1) .+ (1:2), xi[k])
-#         t += 1
-#     end
-
-# end
-
 
 """
     solve(x0, nlp::HybridNLP; tol, c_tol, max_iter)
