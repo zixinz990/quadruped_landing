@@ -29,12 +29,13 @@ end
 
 MOI.initialize(prob::HybridNLP, features) = nothing
 function MOI.jacobian_structure(nlp::HybridNLP)
-    if nlp.use_sparse_jacobian
-        initialize_sparsity!(nlp)
-        getrc(nlp.blocks)
-    else
-        vec(Tuple.(CartesianIndices(zeros(num_duals(nlp), num_primals(nlp)))))
-    end
+    # if nlp.use_sparse_jacobian
+    #     initialize_sparsity!(nlp)
+    #     getrc(nlp.blocks)
+    # else
+    #     vec(Tuple.(CartesianIndices(zeros(num_duals(nlp), num_primals(nlp)))))
+    # end
+    vec(Tuple.(CartesianIndices(zeros(num_duals(nlp), num_primals(nlp)))))
 end
 
 

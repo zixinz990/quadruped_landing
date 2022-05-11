@@ -82,9 +82,14 @@ for i in tqdm.tqdm(range(data.shape[0])):
         if frame[14] > 0.048356899284183096:
             plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + (frame[16] - mf*g) * force_scale], c='r')
             plt.plot([frame[5], frame[5] + frame[17] * force_scale], [frame[6], frame[6] + (frame[18] - mf*g) * force_scale], c='r')
+            # plt.arrow(frame[3], frame[4], frame[3] + frame[15] * force_scale, frame[4] + (frame[16] - mf*g) * force_scale)
+            # plt.arrow(frame[5], frame[6], frame[5] + frame[17] * force_scale, frame[6] + (frame[18] - mf*g) * force_scale)
         else:
             plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + frame[16] * force_scale], c='r')
-    plt.savefig('../results/temp.jpg')
+            # plt.arrow(frame[3], frame[4], frame[3] + frame[15] * force_scale, frame[4] + frame[16] * force_scale)
+    if i == 101 or 133 or 165 or 197 or 229 or 261 or 293 or 325 or 357 or 389:
+        file_name = '../results/' + str(i) + '.jpg'
+        plt.savefig(file_name)
     plt.cla()
     plt.clf()
     video_writer.append_data(imageio.imread('../results/temp.jpg'))

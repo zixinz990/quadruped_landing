@@ -1,8 +1,7 @@
 """
     reference_trajectory(model, N, k_trans, xterm, init_mode)
 
-Return a reference trajectory that translates the walker from an x position of `xinit` to `xterm`,
-with a nominal body height of `height` meters.
+Return a reference trajectory.
 """
 function reference_trajectory(model::PlanarQuadruped, N, k_trans, xterm, init_mode, dt)
     n, m = size(model)
