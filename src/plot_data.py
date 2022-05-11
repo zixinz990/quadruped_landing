@@ -5,6 +5,7 @@ if __name__ == "__main__":
     g = -9.81  # gravity
 
     mb = 10.0  # body mass
+    mf = 0.1  # foot mass
     if not os.path.exists('../results'):
         os.mkdir('../results')
 
@@ -38,6 +39,20 @@ if __name__ == "__main__":
     F1y = data[:, 16]
     F2x = data[:, 17]
     F2y = data[:, 18]
+
+    GRF_1y = F1y - mf * g
+    GRF_2y = F2y - mf * g
+
+    GRF_1 = np.zeros(60)
+    GRF_2 = np.zeros(40)
+
+    for i in range(60):
+        GRF_1[i] = np.sqrt(F1x[i] * F1x[i] + GRF_1y[i] * GRF_1y[i])
+
+    for i in range(20, 60):
+        GRF_2[i-20] = np.sqrt(F2x[i] * F2x[i] + GRF_2y[i] * GRF_2y[i])
+    
+    times_2 = times[20:]
 
     plt.plot(times, body_x, label="body com position x")
     plt.plot(times, body_y, label="body com position y")
@@ -77,14 +92,16 @@ if __name__ == "__main__":
 
     plt.cla()
     plt.clf()
-    plt.plot(times, F1x, label="F1x")
-    plt.plot(times, F1y, label="F1y")
-    plt.plot(times, F2x, label="F2x")
-    plt.plot(times, F2y, label="F2y")
-    plt.axhline(y=-mb*g / 2, color='b', linestyle='--')
+    # plt.plot(times, F1x, label="GRF 1 x")
+    # plt.plot(times, GRF_1y, label="GRF 1 y")
+    plt.plot(times, GRF_1, label="GRF 1")
+    # plt.plot(times, F2x, label="F2x")
+    # plt.plot(times, F2y, label="F2y")
+    # plt.axhline(y=-mf*g / 2, color='b', linestyle='--')
+    plt.plot(times[20:], GRF_2, label="GRF 2")
     plt.ylabel("Force (N)")
     plt.xlabel("Time (sec)")
-    plt.title("Force on the Feet")
+    plt.title("GRFs on the Feet")
     plt.legend()
     plt.savefig('../results/force.jpg')
 
