@@ -1,9 +1,7 @@
 """
     HybridNLP{n,m,L,Q}
 
-Represents a (N)on(L)inear (P)rogram of a trajectory optimization problem,
-with a dynamics model of type `L`, a quadratic cost function, horizon `T`, 
-and initial and final state `x0`, `xf`.
+Represents a (N)on(L)inear (P)rogram of a trajectory optimization problem.
 
 The kth state and control can be extracted from the concatenated state vector `Z` using
 `Z[nlp.xinds[k]]`, and `Z[nlp.uinds[k]]`.
@@ -11,21 +9,6 @@ The kth state and control can be extracted from the concatenated state vector `Z
 # Constructor
     HybridNLP(model, obj, init_mode, k_trans, N, x0, xf, integration; use_sparse_jacobian)
 
-# Basic Methods
-    Base.size(nlp)    # returns (n,m,T)
-    num_ineq(nlp)     # number of inequality constraints
-    num_eq(nlp)       # number of equality constraints
-    num_primals(nlp)  # number of primal variables
-    num_duals(nlp)    # total number of dual variables
-    packZ(nlp, X, U)  # Stacks state `X` and controls `U` into one vector `Z`
-
-# Evaluating the NLP
-The NLP supports the following API for evaluating various pieces of the NLP:
-
-    eval_f(nlp, Z)         # evaluate the objective
-    grad_f!(nlp, grad, Z)  # gradient of the objective
-    eval_c!(nlp, c, Z)     # evaluate the constraints
-    jac_c!(nlp, c, Z)      # constraint Jacobian
 """
 struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
     model::L                                 # dynamics model
