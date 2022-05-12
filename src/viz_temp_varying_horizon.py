@@ -19,7 +19,7 @@ g = -9.81
 force_scale = 0.005
 video_writer = imageio.get_writer("../results/pc_video.mp4", fps=60)
 
-data = np.genfromtxt('1.csv', delimiter=',')
+data = np.genfromtxt('data_optimal_solution_found_1.csv', delimiter=',')
 data = data[:-15]
 data = data.reshape((-1, 20))
 times = data[:, 14]
@@ -87,9 +87,10 @@ for i in tqdm.tqdm(range(data.shape[0])):
         else:
             plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + frame[16] * force_scale], c='r')
             # plt.arrow(frame[3], frame[4], frame[3] + frame[15] * force_scale, frame[4] + frame[16] * force_scale)
-    if i == 101 or 133 or 165 or 197 or 229 or 261 or 293 or 325 or 357 or 389:
-        file_name = '../results/' + str(i) + '.jpg'
-        plt.savefig(file_name)
+    # if i == 101 or 133 or 165 or 197 or 229 or 261 or 293 or 325 or 357 or 389:
+    #     file_name = '../results/' + str(i) + '.jpg'
+    #     plt.savefig(file_name)
+    plt.savefig("../results/temp.jpg")
     plt.cla()
     plt.clf()
     video_writer.append_data(imageio.imread('../results/temp.jpg'))
