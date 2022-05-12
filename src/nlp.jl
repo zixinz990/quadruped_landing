@@ -47,7 +47,6 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
     rows::Vector{Int}                        # rows for Jacobian sparsity
     cols::Vector{Int}                        # columns for Jacobian sparsity
     use_sparse_jacobian::Bool
-    # blocks::BlockViews
     function HybridNLP(model, obj::Vector{<:QuadraticCost{n,m}}, init_mode::Integer, k_trans::Integer,
         N::Integer, x0::AbstractVector, xf::AbstractVector,
         integration::Type{<:QuadratureRule}=RK4; use_sparse_jacobian::Bool=false
@@ -89,7 +88,6 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         zU = fill(+Inf, n_nlp)
         rows = Int[]
         cols = Int[]
-        # blocks = BlockViews(m_nlp, n_nlp)
 
         new{n,m,typeof(model),integration}(
             model, obj,
