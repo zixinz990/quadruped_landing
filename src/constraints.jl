@@ -123,7 +123,7 @@ end
 Calculate the body position constraints.
 """
 function body_pos_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
-    d = view(c, nlp.cinds[6])
+    d = view(c, nlp.cinds[7])
 
     xi = nlp.xinds
     N = nlp.N
@@ -145,7 +145,7 @@ end
 Calculate the kinematics constraints.
 """
 function kinematics_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
-    d = view(c, nlp.cinds[7])
+    d = view(c, nlp.cinds[8])
 
     xi = nlp.xinds
     N = nlp.N
@@ -171,11 +171,14 @@ Evaluate all the constraints
 """
 function eval_c!(nlp::HybridNLP, c, Z)
     xi = nlp.xinds
+    ui = nlp.uinds
+
     c[nlp.cinds[1]] .= Z[xi[1]] - nlp.x0
     c[nlp.cinds[2]] .= Z[xi[end]][1:14] - nlp.xf[1:14]
     dynamics_constraint!(nlp, c, Z)
     contact_init_constraints!(nlp, c, Z)
     contact_another_constraints!(nlp, c, Z)
+    c[nlp.cinds[6]] .= Z[ui[end]][2] + Z[ui[end]][4] .+ nlp.model.mb * nlp.model.g
     body_pos_constraints!(nlp, c, Z)
     # kinematics_constraints!(nlp, c, Z)
     # self_collision_constraints!(nlp, c, Z)
@@ -245,8 +248,9 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     jac_dynamics = view(jac, nlp.cinds[3], :)
     jac_contact_init = view(jac, nlp.cinds[4], :)
     jac_contact_another = view(jac, nlp.cinds[5], :)
-    jac_body_pos = view(jac, nlp.cinds[6], :)
-    # jac_kinematics = view(jac, nlp.cinds[7], :)
+    jac_final_ctrl = view(jac, nlp.cinds[6], ui[end])
+    jac_body_pos = view(jac, nlp.cinds[7], :)
+    # jac_kinematics = view(jac, nlp.cinds[8], :)
 
     jac_init .= I(n)
     jac_term .= I(n)[1:n-1, :]
@@ -277,6 +281,9 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
             jac_contact_another[i, xi[k][5]] = 1.0   # y1
         end
     end
+
+    # jac_final_ctrl
+    jac_final_ctrl = [0.0 1.0 0.0 1.0 0.0]
 
     # jac_body_pos
     for k = 1:N

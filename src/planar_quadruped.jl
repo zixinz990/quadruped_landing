@@ -19,8 +19,8 @@ Base.@kwdef struct PlanarQuadruped <: AbstractModel
     l2::Float64 = 0.25  # calf length
 end
 
-# state:   xₖ = [pbₖ; p1ₖ; p2ₖ; vbₖ; v1ₖ; v2ₖ; tₖ], dim = 7+7+1 = 15
-# control: uₖ = [F1ₖ; F2ₖ; hₖ], dim = 2+2+1 = 5
+# state: xₖ = [pbₖ; p1ₖ; p2ₖ; vbₖ; v1ₖ; v2ₖ; tₖ], dim = 15
+# control: uₖ = [F1ₖ; F2ₖ; hₖ], dim = 5
 # x[k+1] = [rk4(hₖ); tₖ+hₖ]
 RobotDynamics.state_dim(::PlanarQuadruped) = 15
 RobotDynamics.control_dim(::PlanarQuadruped) = 5
@@ -35,33 +35,43 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     mf = model.mf
     Ib = mb * lb^2 / 12
 
-    # state = [pb, θ, vb, ω, p1, p2]
     pb = x[1:2]  # body link position
+    θ = x[3]    # body link orientation
     p1 = x[4:5]  # foot 1 position
-    p2 = x[6:7]  # foot 2 poisition
-    velocities = x[8:14]
+    p2 = x[6:7]  # foot 2 position
+    v = x[8:14] # velocities
 
-    # control = [v1, v2, F1, F2]
-    F1 = u[1:2]
-    F2 = u[3:4]
+    vb = x[8:9]
+    ω = x[10]
+    v1 = x[11:12]
+    v2 = x[13:14]
+
+    F1x = u[1]
+    F1y = u[2]
+    F2x = u[3]
+    F2y = u[4]
 
     # body_dynamics
-    temp_acc = (F1 + F2) ./ mb
+    # temp_acc = (F1 + F2) ./ mb
+    # body_acc_x = temp_acc[1]
+    # body_acc_y = temp_acc[2] + g
+    body_acc_x = (F1x + F2x) / mb
+    body_acc_y = (F1y + F2y) / mb + g
 
-    body_acc_x = temp_acc[1]
-    body_acc_y = temp_acc[2] + g
-
-    τF = -F1[1] * (p1[2] - pb[2]) + F1[2] * (p1[1] - pb[1]) - F2[1] * (p2[2] - pb[2]) + F2[2] * (p2[1] - pb[1])
+    τF = -F1x * (p1[2] - pb[2]) + F1y * (p1[1] - pb[1]) - F2x * (p2[2] - pb[2]) + F2y * (p2[1] - pb[1])
     body_w = τF / Ib
 
     # foot 1 constraints
-    foot_1_a = zeros(2)
+    foot_1_acc = zeros(2)
 
     # foot 2 dynamics
-    foot_2_a = -F2 ./ mf
+    # foot_2_a = -F2 ./ mf
+    foot_2_acc_x = -F2x / mf
+    foot_2_acc_y = -F2y / mf + g
 
-    x_dot = zeros(length(x))
-    x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
+    # x_dot = zeros(length(x))
+    # x_dot = [v; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
+    x_dot = [vb; ω; 0.0; 0.0; v2; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc_x; foot_2_acc_y]
 
     return x_dot
 end
@@ -76,33 +86,43 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
     mf = model.mf
     Ib = mb * lb^2 / 12
 
-    # state = [pb, θ, vb, ω, p1, p2]
     pb = x[1:2]  # body link position
+    θ = x[3]    # body link orientation
     p1 = x[4:5]  # foot 1 position
-    p2 = x[6:7]  # foot 2 poisition
-    velocities = x[8:14]
+    p2 = x[6:7]  # foot 2 position
+    v = x[8:14] # velocities
 
-    # control = [v1, v2, F1, F2]
-    F1 = u[1:2]
-    F2 = u[3:4]
+    vb = x[8:9]
+    ω = x[10]
+    v1 = x[11:12]
+    v2 = x[13:14]
+
+    F1x = u[1]
+    F1y = u[2]
+    F2x = u[3]
+    F2y = u[4]
 
     # body_dynamics
-    temp_acc = (F1 + F2) ./ mb
+    # temp_acc = (F1 + F2) ./ mb
+    # body_acc_x = temp_acc[1]
+    # body_acc_y = temp_acc[2] + g
+    body_acc_x = (F1x + F2x) / mb
+    body_acc_y = (F1y + F2y) / mb + g
 
-    body_acc_x = temp_acc[1]
-    body_acc_y = temp_acc[2] + g
-
-    τF = -F1[1] * (p1[2] - pb[2]) + F1[2] * (p1[1] - pb[1]) - F2[1] * (p2[2] - pb[2]) + F2[2] * (p2[1] - pb[1])
+    τF = -F1x * (p1[2] - pb[2]) + F1y * (p1[1] - pb[1]) - F2x * (p2[2] - pb[2]) + F2y * (p2[1] - pb[1])
     body_w = τF / Ib
 
     # foot 1 dynamics
-    foot_1_a = -F1 ./ mf
+    # foot_1_a = -F1 ./ mf
+    foot_1_acc_x = -F1x / mf
+    foot_1_acc_y = -F1y / mf + g
 
     # foot 2 constraints
-    foot_2_a = zeros(2)
+    foot_2_acc = zeros(2)
 
-    x_dot = zeros(length(x))
-    x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
+    # x_dot = zeros(length(x))
+    # x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
+    x_dot = [vb; ω; v1; 0.0; 0.0; body_acc_x; body_acc_y; body_w; foot_1_acc_x; foot_1_acc_y; foot_2_acc]
 
     return x_dot
 end
@@ -117,33 +137,41 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     mf = model.mf
     Ib = mb * lb^2 / 12
 
-    # state = [pb, θ, vb, ω, p1, p2]
     pb = x[1:2]  # body link position
+    θ = x[3]    # body link orientation
     p1 = x[4:5]  # foot 1 position
-    p2 = x[6:7]  # foot 2 poisition
-    velocities = x[8:14]
+    p2 = x[6:7]  # foot 2 position
+    v = x[8:14] # velocities
 
-    # control = [v1, v2, F1, F2]
-    F1 = u[1:2]
-    F2 = u[3:4]
+    vb = x[8:9]
+    ω = x[10]
+    v1 = x[11:12]
+    v2 = x[13:14]
+
+    F1x = u[1]
+    F1y = u[2]
+    F2x = u[3]
+    F2y = u[4]
 
     # body_dynamics
-    temp_acc = (F1 + F2) ./ mb
+    # temp_acc = (F1 + F2) ./ mb
+    # body_acc_x = temp_acc[1]
+    # body_acc_y = temp_acc[2] + g
+    body_acc_x = (F1x + F2x) / mb
+    body_acc_y = (F1y + F2y) / mb + g
 
-    body_acc_x = temp_acc[1]
-    body_acc_y = temp_acc[2] + g
-
-    τF = -F1[1] * (p1[2] - pb[2]) + F1[2] * (p1[1] - pb[1]) - F2[1] * (p2[2] - pb[2]) + F2[2] * (p2[1] - pb[1])
+    τF = -F1x * (p1[2] - pb[2]) + F1y * (p1[1] - pb[1]) - F2x * (p2[2] - pb[2]) + F2y * (p2[1] - pb[1])
     body_w = τF / Ib
 
     # foot 1 constraints
-    foot_1_a = zeros(2)
+    foot_1_acc = zeros(2)
 
     # foot 2 constraints
-    foot_2_a = zeros(2)
+    foot_2_acc = zeros(2)
 
-    x_dot = zeros(length(x))
-    x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
+    # x_dot = zeros(length(x))
+    # x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
+    x_dot = [vb; ω; 0.0; 0.0; 0.0; 0.0; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc]
 
     return x_dot
 end

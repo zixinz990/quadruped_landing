@@ -19,7 +19,7 @@ g = -9.81
 force_scale = 0.005
 video_writer = imageio.get_writer("../results/pc_video.mp4", fps=60)
 
-data = np.genfromtxt('data_optimal_solution_found_1.csv', delimiter=',')
+data = np.genfromtxt('data_2.csv', delimiter=',')
 data = data[:-15]
 data = data.reshape((-1, 20))
 times = data[:, 14]
