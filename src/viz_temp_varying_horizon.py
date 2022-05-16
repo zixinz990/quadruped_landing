@@ -11,7 +11,7 @@ if not os.path.exists('../results'):
     os.mkdir('../results')
 
 
-free_fall = True
+free_fall = False
 plot_force = True
 mf = 0.1
 dt = 0.001
@@ -19,7 +19,7 @@ g = -9.81
 force_scale = 0.005
 video_writer = imageio.get_writer("../results/pc_video.mp4", fps=60)
 
-data = np.genfromtxt('data_2.csv', delimiter=',')
+data = np.genfromtxt('data_8.csv', delimiter=',')
 data = data[:-15]
 data = data.reshape((-1, 20))
 times = data[:, 14]
@@ -79,14 +79,16 @@ for i in tqdm.tqdm(range(data.shape[0])):
     plt.xlim(-1, 0.5)
     # plt.xlim(-0.5, 1)
     if plot_force:
-        if frame[14] > 0.048356899284183096:
-            plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + (frame[16] - mf*g) * force_scale], c='r')
-            plt.plot([frame[5], frame[5] + frame[17] * force_scale], [frame[6], frame[6] + (frame[18] - mf*g) * force_scale], c='r')
-            # plt.arrow(frame[3], frame[4], frame[3] + frame[15] * force_scale, frame[4] + (frame[16] - mf*g) * force_scale)
-            # plt.arrow(frame[5], frame[6], frame[5] + frame[17] * force_scale, frame[6] + (frame[18] - mf*g) * force_scale)
-        else:
-            plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + frame[16] * force_scale], c='r')
-            # plt.arrow(frame[3], frame[4], frame[3] + frame[15] * force_scale, frame[4] + frame[16] * force_scale)
+        # if frame[14] > 0.048356899284183096:
+        #     plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + (frame[16] - mf*g) * force_scale], c='r')
+        #     plt.plot([frame[5], frame[5] + frame[17] * force_scale], [frame[6], frame[6] + (frame[18] - mf*g) * force_scale], c='r')
+        #     # plt.arrow(frame[3], frame[4], frame[3] + frame[15] * force_scale, frame[4] + (frame[16] - mf*g) * force_scale)
+        #     # plt.arrow(frame[5], frame[6], frame[5] + frame[17] * force_scale, frame[6] + (frame[18] - mf*g) * force_scale)
+        # else:
+        #     plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + frame[16] * force_scale], c='r')
+        #     # plt.arrow(frame[3], frame[4], frame[3] + frame[15] * force_scale, frame[4] + frame[16] * force_scale)
+        plt.plot([frame[3], frame[3] + frame[15] * force_scale], [frame[4], frame[4] + (frame[16] - mf*g) * force_scale], c='r')
+        plt.plot([frame[5], frame[5] + frame[17] * force_scale], [frame[6], frame[6] + (frame[18] - mf*g) * force_scale], c='r')
     # if i == 101 or 133 or 165 or 197 or 229 or 261 or 293 or 325 or 357 or 389:
     #     file_name = '../results/' + str(i) + '.jpg'
     #     plt.savefig(file_name)

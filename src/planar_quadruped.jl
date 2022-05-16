@@ -25,111 +25,14 @@ end
 RobotDynamics.state_dim(::PlanarQuadruped) = 15
 RobotDynamics.control_dim(::PlanarQuadruped) = 5
 
-# this function only return the derivative of the first 14 elements!
-# the input state dim should be 14!
-# the input control dim should be 5!
-function contact1_dynamics(model::PlanarQuadruped, x, u)
-    g = model.g
-    mb = model.mb
-    lb = model.lb
-    mf = model.mf
-    Ib = mb * lb^2 / 12
+"""
+    contact3_dynamics(model, x, u)
 
-    pb = x[1:2]  # body link position
-    θ = x[3]    # body link orientation
-    p1 = x[4:5]  # foot 1 position
-    p2 = x[6:7]  # foot 2 position
-    v = x[8:14] # velocities
-
-    vb = x[8:9]
-    ω = x[10]
-    v1 = x[11:12]
-    v2 = x[13:14]
-
-    F1x = u[1]
-    F1y = u[2]
-    F2x = u[3]
-    F2y = u[4]
-
-    # body_dynamics
-    # temp_acc = (F1 + F2) ./ mb
-    # body_acc_x = temp_acc[1]
-    # body_acc_y = temp_acc[2] + g
-    body_acc_x = (F1x + F2x) / mb
-    body_acc_y = (F1y + F2y) / mb + g
-
-    τF = -F1x * (p1[2] - pb[2]) + F1y * (p1[1] - pb[1]) - F2x * (p2[2] - pb[2]) + F2y * (p2[1] - pb[1])
-    body_w = τF / Ib
-
-    # foot 1 constraints
-    foot_1_acc = zeros(2)
-
-    # foot 2 dynamics
-    # foot_2_a = -F2 ./ mf
-    foot_2_acc_x = -F2x / mf
-    foot_2_acc_y = -F2y / mf + g
-
-    # x_dot = zeros(length(x))
-    # x_dot = [v; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
-    x_dot = [vb; ω; 0.0; 0.0; v2; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc_x; foot_2_acc_y]
-
-    return x_dot
-end
-
-# this function only return the derivative of the first 14 elements!
-# the input state dim should be 14!
-# the input control dim should be 5!
-function contact2_dynamics(model::PlanarQuadruped, x, u)
-    g = model.g
-    mb = model.mb
-    lb = model.lb
-    mf = model.mf
-    Ib = mb * lb^2 / 12
-
-    pb = x[1:2]  # body link position
-    θ = x[3]    # body link orientation
-    p1 = x[4:5]  # foot 1 position
-    p2 = x[6:7]  # foot 2 position
-    v = x[8:14] # velocities
-
-    vb = x[8:9]
-    ω = x[10]
-    v1 = x[11:12]
-    v2 = x[13:14]
-
-    F1x = u[1]
-    F1y = u[2]
-    F2x = u[3]
-    F2y = u[4]
-
-    # body_dynamics
-    # temp_acc = (F1 + F2) ./ mb
-    # body_acc_x = temp_acc[1]
-    # body_acc_y = temp_acc[2] + g
-    body_acc_x = (F1x + F2x) / mb
-    body_acc_y = (F1y + F2y) / mb + g
-
-    τF = -F1x * (p1[2] - pb[2]) + F1y * (p1[1] - pb[1]) - F2x * (p2[2] - pb[2]) + F2y * (p2[1] - pb[1])
-    body_w = τF / Ib
-
-    # foot 1 dynamics
-    # foot_1_a = -F1 ./ mf
-    foot_1_acc_x = -F1x / mf
-    foot_1_acc_y = -F1y / mf + g
-
-    # foot 2 constraints
-    foot_2_acc = zeros(2)
-
-    # x_dot = zeros(length(x))
-    # x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
-    x_dot = [vb; ω; v1; 0.0; 0.0; body_acc_x; body_acc_y; body_w; foot_1_acc_x; foot_1_acc_y; foot_2_acc]
-
-    return x_dot
-end
-
-# this function only return the derivative of the first 14 elements!
-# the input state dim should be 14!
-# the input control dim should be 5!
+Calculate dynamics.
+Only return the first 14 elements.
+The input state dim should be 14.
+The input control dim should be 5.
+"""
 function contact3_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
     mb = model.mb
@@ -138,13 +41,13 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     Ib = mb * lb^2 / 12
 
     pb = x[1:2]  # body link position
-    θ = x[3]    # body link orientation
+    θ  = x[3]    # body link orientation
     p1 = x[4:5]  # foot 1 position
     p2 = x[6:7]  # foot 2 position
-    v = x[8:14] # velocities
+    v  = x[8:14] # velocities
 
     vb = x[8:9]
-    ω = x[10]
+    ω  = x[10]
     v1 = x[11:12]
     v2 = x[13:14]
 
@@ -154,9 +57,6 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     F2y = u[4]
 
     # body_dynamics
-    # temp_acc = (F1 + F2) ./ mb
-    # body_acc_x = temp_acc[1]
-    # body_acc_y = temp_acc[2] + g
     body_acc_x = (F1x + F2x) / mb
     body_acc_y = (F1y + F2y) / mb + g
 
@@ -164,40 +64,18 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     body_w = τF / Ib
 
     # foot 1 constraints
+    foot_1_v   = zeros(2)
     foot_1_acc = zeros(2)
 
     # foot 2 constraints
+    foot_2_v   = zeros(2)
     foot_2_acc = zeros(2)
 
     # x_dot = zeros(length(x))
     # x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
-    x_dot = [vb; ω; 0.0; 0.0; 0.0; 0.0; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc]
+    x_dot = [vb; ω; foot_1_v; foot_2_v; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc]
 
     return x_dot
-end
-
-# the input state dim should be 15!
-# the input control dim should be 5!
-function contact1_dynamics_rk4(model, x, u)
-    # RK4 integration with zero-order hold on u
-    h = u[end]
-    f1 = contact1_dynamics(model, x[1:end-1], u)
-    f2 = contact1_dynamics(model, x[1:end-1] + 0.5 * h * f1, u)
-    f3 = contact1_dynamics(model, x[1:end-1] + 0.5 * h * f2, u)
-    f4 = contact1_dynamics(model, x[1:end-1] + h * f3, u)
-    return [x[1:end-1] + (h / 6.0) * (f1 + 2 * f2 + 2 * f3 + f4); x[end] + u[end]]
-end
-
-# the input state dim should be 15!
-# the input control dim should be 5!
-function contact2_dynamics_rk4(model, x, u)
-    # RK4 integration with zero-order hold on u
-    h = u[end]
-    f1 = contact2_dynamics(model, x[1:end-1], u)
-    f2 = contact2_dynamics(model, x[1:end-1] + 0.5 * h * f1, u)
-    f3 = contact2_dynamics(model, x[1:end-1] + 0.5 * h * f2, u)
-    f4 = contact2_dynamics(model, x[1:end-1] + h * f3, u)
-    return [x[1:end-1] + (h / 6.0) * (f1 + 2 * f2 + 2 * f3 + f4); x[end] + u[end]]
 end
 
 # the input state dim should be 15!
@@ -214,42 +92,9 @@ end
 
 # the input state dim should be 15!
 # the input control dim should be 5!
-function contact1_jacobian(model::PlanarQuadruped, x, u)
-    xi = SVector{15}(1:15)
-    ui = SVector{5}(1:5) .+ 15
-    f(z) = contact1_dynamics_rk4(model, z[xi], z[ui])
-    return ForwardDiff.jacobian(f, [x; u])
-end
-
-# the input state dim should be 15!
-# the input control dim should be 5!
-function contact2_jacobian(model::PlanarQuadruped, x, u)
-    xi = SVector{15}(1:15)
-    ui = SVector{5}(1:5) .+ 15
-    f(z) = contact2_dynamics_rk4(model, z[xi], z[ui])
-    return ForwardDiff.jacobian(f, [x; u])
-end
-
-# the input state dim should be 15!
-# the input control dim should be 5!
 function contact3_jacobian(model::PlanarQuadruped, x, u)
     xi = SVector{15}(1:15)
     ui = SVector{5}(1:5) .+ 15
     f(z) = contact3_dynamics_rk4(model, z[xi], z[ui])
     return ForwardDiff.jacobian(f, [x; u])
 end
-
-function jump1_map(x)
-    # from mode 1 to 3
-    xn = [x[1:4]; 0.0; x[6]; 0.0; x[8:10]; zeros(4); x[15]] # y1 = y2 = 0
-    return xn
-end
-
-function jump2_map(x)
-    # from mode 2 to 3
-    xn = [x[1:4]; 0.0; x[6]; 0.0; x[8:10]; zeros(4); x[15]] # y1 = y2 = 0
-    return xn
-end
-
-jump1_jacobian() = Diagonal(SA[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0])
-jump2_jacobian() = Diagonal(SA[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0])

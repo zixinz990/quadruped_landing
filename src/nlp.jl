@@ -7,19 +7,15 @@ The kth state and control can be extracted from the concatenated state vector `Z
 `Z[nlp.xinds[k]]`, and `Z[nlp.uinds[k]]`.
 
 # Constructor
-    HybridNLP(model, obj, init_mode, k_trans, N, x0, xf, integration; use_sparse_jacobian)
+    HybridNLP(model, obj, init_mode, N, x0, xf, integration; use_sparse_jacobian)
 
 """
 struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
     model::L                                 # dynamics model
     obj::Vector{QuadraticCost{n,m,Float64}}  # objective function
     N::Int                                   # number of knot points
-    Nmodes::Int                              # number of modes
-    init_mode::Int                           # the mode ID of the initial state
-    k_trans::Int                             # the start index of mode 3
     x0::MVector{n,Float64}                   # initial condition
     xf::MVector{n,Float64}                   # final condition
-    modes::Vector{Int}                       # mode ID
     xinds::Vector{SVector{n,Int}}            # Z[xinds[k]] gives states for time step k
     uinds::Vector{SVector{m,Int}}            # Z[uinds[k]] gives controls for time step k
     cinds::Vector{UnitRange{Int}}            # indices for each of the constraints
@@ -30,19 +26,13 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
     rows::Vector{Int}                        # rows for Jacobian sparsity
     cols::Vector{Int}                        # columns for Jacobian sparsity
     use_sparse_jacobian::Bool
-    function HybridNLP(model, obj::Vector{<:QuadraticCost{n,m}}, init_mode::Integer, k_trans::Integer,
+    function HybridNLP(model, obj::Vector{<:QuadraticCost{n,m}},
         N::Integer, x0::AbstractVector, xf::AbstractVector,
         integration::Type{<:QuadratureRule}=RK4; use_sparse_jacobian::Bool=false
     ) where {n,m}
         # Create indices
         xinds = [SVector{n}((k - 1) * (n + m) .+ (1:n)) for k = 1:N]
         uinds = [SVector{m}((k - 1) * (n + m) .+ (n+1:n+m)) for k = 1:N-1]
-
-        # Contact schedule
-        modes = map(1:N) do k
-            (k < k_trans) ? init_mode : 3
-        end
-        Nmodes = 2
 
         # Equality constraints
         c_init_inds       = 1:n                                                # initial constraint
@@ -51,19 +41,19 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         c_contact_inds    = (c_dyn_inds[end]+1):(c_dyn_inds[end]+2*N)          # contact constraints
         c_final_ctrl_inds = (c_contact_inds[end]+1):(c_contact_inds[end]+1)    # final control constraint
 
-        # Inequality constraints        
-        c_body_pos_inds = (c_final_ctrl_inds[end]+1):(c_final_ctrl_inds[end]+N)  # body position constraints
+        # Inequality constraints
+        # c_body_pos_inds = (c_final_ctrl_inds[end]+1):(c_final_ctrl_inds[end]+N)  # body position constraints
 
         # c_kin_inds = (c_body_pos_inds[end]+1):(c_body_pos_inds[end]+2*N)  # kinematic constraints (2 per time step)
 
-        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_contact_inds, c_final_ctrl_inds, c_body_pos_inds]
+        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_contact_inds, c_final_ctrl_inds]
         m_nlp = cinds[end][end]
 
         # Constraints bounds
         lb = fill(0.0, m_nlp) # lower bounds on the constraints
         ub = fill(0.0, m_nlp) # upper bounds on the constraints
 
-        ub[c_body_pos_inds] .= Inf
+        # ub[c_body_pos_inds] .= Inf
         # ub[c_kin_inds] .= model.l1 + model.l2 + model.lb/2
 
         n_nlp = n * N + (N - 1) * m
@@ -74,7 +64,7 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
 
         new{n,m,typeof(model),integration}(
             model, obj,
-            N, Nmodes, init_mode, k_trans, x0, xf, modes,
+            N, x0, xf,
             xinds, uinds, cinds, lb, ub, zL, zU, rows, cols, use_sparse_jacobian
         )
     end
