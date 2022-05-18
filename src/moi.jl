@@ -51,11 +51,6 @@ function solve(x0, prob::HybridNLP;
     x_l, x_u = fill(-Inf, n_nlp), fill(+Inf, n_nlp)
 
     for k = 1:N
-        # # lower bound of body and feet positions, should always above the ground
-        # x_l[2+20*(k-1)] = 0.0 # yb >= 0
-        # x_l[5+20*(k-1)] = 0.0 # y1 >= 0
-        # x_l[7+20*(k-1)] = 0.0 # y2 >= 0
-
         # lower and upper bound of body orientation
         x_l[3+20*(k-1)] = -pi / 2 # theta >= -pi/2
         x_u[3+20*(k-1)] = pi / 2  # theta <= pi/2
@@ -63,7 +58,11 @@ function solve(x0, prob::HybridNLP;
         if k < N
             # lower bound and upper bound of dt
             x_l[20+20*(k-1)] = 0.001
-            x_u[20+20*(k-1)] = 0.009
+            x_u[20+20*(k-1)] = 0.02
+
+            # lower bound of F
+            x_l[22+20*(k-1)] = 0.0
+            x_l[24+20*(k-1)] = 0.0
         end
     end
 

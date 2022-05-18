@@ -45,19 +45,21 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         Nmodes = 2
 
         # Equality constraints
-        c_init_inds = 1:n                                                                          # initial constraint
-        c_term_inds = (c_init_inds[end]+1):(c_init_inds[end]+n-1)                                  # terminal constraint
-        c_dyn_inds = (c_term_inds[end]+1):(c_term_inds[end]+(N-1)*n)                               # dynamics constraints       
-        c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+N)                              # contact constraints of the initial mode (2 per time step)
-        c_other_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+N-k_trans+1) # contact constraints of another leg (2 per time step)
-        c_final_ctrl_inds = (c_other_contact_inds[end]+1):(c_other_contact_inds[end]+1)            # final control constraint
+        c_init_inds = 1:n                                                                            # initial constraint
+        c_term_inds = (c_init_inds[end]+1):(c_init_inds[end]+n-1)                                    # terminal constraint
+        c_dyn_inds = (c_term_inds[end]+1):(c_term_inds[end]+(N-1)*n)                                 # dynamics constraints
+
+        c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+N)                                # contact constraints of the initial touch-down foot
+        c_another_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+N-k_trans+1) # contact constraints of another foot
+
+        c_final_ctrl_inds = (c_another_contact_inds[end]+1):(c_another_contact_inds[end]+1)          # final control constraint
 
         # Inequality constraints        
-        c_body_pos_inds = (c_final_ctrl_inds[end]+1):(c_final_ctrl_inds[end]+N)              # body position constraints
+        c_body_pos_inds = (c_final_ctrl_inds[end]+1):(c_final_ctrl_inds[end]+N)  # body position constraints
 
         # c_kin_inds = (c_body_pos_inds[end]+1):(c_body_pos_inds[end]+2*N)                         # kinematic constraints (2 per time step)
 
-        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_other_contact_inds, c_final_ctrl_inds, c_body_pos_inds]
+        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_another_contact_inds, c_final_ctrl_inds, c_body_pos_inds]
         m_nlp = cinds[end][end]
 
         # Constraints bounds

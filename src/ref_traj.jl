@@ -17,18 +17,20 @@ function reference_trajectory(model::PlanarQuadruped, N, k_trans, xterm, init_mo
 
     # initialize Uref
     if init_mode == 1
-        Uref[2, 1:k_trans-1] .= mb * g     # F1_y in contact mode 1
+        Uref[2, 1:k_trans-1] .= -mb * g      # F1_y in contact mode 1
         
-        Uref[2, k_trans:end] .= mb * g / 2 # F1_y in contact mode 3
-        Uref[4, k_trans:end] .= mb * g / 2 # F2_y in contact mode 3
+        Uref[2, k_trans:end] .= -mb * g / 2  # F1_y in contact mode 3
+        Uref[4, k_trans:end] .= -mb * g / 2  # F2_y in contact mode 3
     else
-        Uref[4, 1:k_trans-1] .= mb * g     # F2_y in contact mode 2
+        Uref[4, 1:k_trans-1] .= -mb * g      # F2_y in contact mode 2
         
-        Uref[4, k_trans:end] .= mb * g / 2 # F2_y in contact mode 3
-        Uref[2, k_trans:end] .= mb * g / 2 # F1_y in contact mode 3
+        Uref[4, k_trans:end] .= -mb * g / 2  # F2_y in contact mode 3
+        Uref[2, k_trans:end] .= -mb * g / 2  # F1_y in contact mode 3
     end
     
-    Uref[end, :] .= dt
+    Uref[5, 1:k_trans-1] .= 0.001  # dt in contact mode 1 or 2
+    Uref[5, k_trans:end] .= 0.02   # dt in contact mode 3
+    # Uref[end, :] .= dt
 
     # Convert to a trajectory
     Xref = [SVector{n}(x) for x in eachcol(Xref)]

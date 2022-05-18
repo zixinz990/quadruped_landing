@@ -25,9 +25,14 @@ end
 RobotDynamics.state_dim(::PlanarQuadruped) = 15
 RobotDynamics.control_dim(::PlanarQuadruped) = 5
 
-# this function only return the derivative of the first 14 elements!
-# the input state dim should be 14!
-# the input control dim should be 5!
+"""
+    contact1_dynamics(model, x, u)
+
+Calculate dynamics of contact mode 1.
+Only return the first 14 elements.
+The input state dim should be 14.
+The input control dim should be 5.
+"""
 function contact1_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
     mb = model.mb
@@ -52,9 +57,6 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     F2y = u[4]
 
     # body_dynamics
-    # temp_acc = (F1 + F2) ./ mb
-    # body_acc_x = temp_acc[1]
-    # body_acc_y = temp_acc[2] + g
     body_acc_x = (F1x + F2x) / mb
     body_acc_y = (F1y + F2y) / mb + g
 
@@ -62,23 +64,28 @@ function contact1_dynamics(model::PlanarQuadruped, x, u)
     body_w = τF / Ib
 
     # foot 1 constraints
+    foot_1_v   = zeros(2)
     foot_1_acc = zeros(2)
 
     # foot 2 dynamics
-    # foot_2_a = -F2 ./ mf
     foot_2_acc_x = -F2x / mf
     foot_2_acc_y = -F2y / mf + g
 
     # x_dot = zeros(length(x))
     # x_dot = [v; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
-    x_dot = [vb; ω; 0.0; 0.0; v2; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc_x; foot_2_acc_y]
+    x_dot = [vb; ω; foot_1_v; v2; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc_x; foot_2_acc_y]
 
     return x_dot
 end
 
-# this function only return the derivative of the first 14 elements!
-# the input state dim should be 14!
-# the input control dim should be 5!
+"""
+    contact2_dynamics(model, x, u)
+
+Calculate dynamics of contact mode 2.
+Only return the first 14 elements.
+The input state dim should be 14.
+The input control dim should be 5.
+"""
 function contact2_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
     mb = model.mb
@@ -103,9 +110,6 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
     F2y = u[4]
 
     # body_dynamics
-    # temp_acc = (F1 + F2) ./ mb
-    # body_acc_x = temp_acc[1]
-    # body_acc_y = temp_acc[2] + g
     body_acc_x = (F1x + F2x) / mb
     body_acc_y = (F1y + F2y) / mb + g
 
@@ -113,23 +117,28 @@ function contact2_dynamics(model::PlanarQuadruped, x, u)
     body_w = τF / Ib
 
     # foot 1 dynamics
-    # foot_1_a = -F1 ./ mf
     foot_1_acc_x = -F1x / mf
     foot_1_acc_y = -F1y / mf + g
 
     # foot 2 constraints
+    foot_2_v   = zeros(2)
     foot_2_acc = zeros(2)
 
     # x_dot = zeros(length(x))
     # x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
-    x_dot = [vb; ω; v1; 0.0; 0.0; body_acc_x; body_acc_y; body_w; foot_1_acc_x; foot_1_acc_y; foot_2_acc]
+    x_dot = [vb; ω; v1; foot_2_v; body_acc_x; body_acc_y; body_w; foot_1_acc_x; foot_1_acc_y; foot_2_acc]
 
     return x_dot
 end
 
-# this function only return the derivative of the first 14 elements!
-# the input state dim should be 14!
-# the input control dim should be 5!
+"""
+    contact3_dynamics(model, x, u)
+
+Calculate dynamics of contact mode 3.
+Only return the first 14 elements.
+The input state dim should be 14.
+The input control dim should be 5.
+"""
 function contact3_dynamics(model::PlanarQuadruped, x, u)
     g = model.g
     mb = model.mb
@@ -138,13 +147,13 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     Ib = mb * lb^2 / 12
 
     pb = x[1:2]  # body link position
-    θ = x[3]    # body link orientation
+    θ  = x[3]    # body link orientation
     p1 = x[4:5]  # foot 1 position
     p2 = x[6:7]  # foot 2 position
-    v = x[8:14] # velocities
+    v  = x[8:14] # velocities
 
     vb = x[8:9]
-    ω = x[10]
+    ω  = x[10]
     v1 = x[11:12]
     v2 = x[13:14]
 
@@ -154,9 +163,6 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     F2y = u[4]
 
     # body_dynamics
-    # temp_acc = (F1 + F2) ./ mb
-    # body_acc_x = temp_acc[1]
-    # body_acc_y = temp_acc[2] + g
     body_acc_x = (F1x + F2x) / mb
     body_acc_y = (F1y + F2y) / mb + g
 
@@ -164,14 +170,16 @@ function contact3_dynamics(model::PlanarQuadruped, x, u)
     body_w = τF / Ib
 
     # foot 1 constraints
+    foot_1_v   = zeros(2)
     foot_1_acc = zeros(2)
 
     # foot 2 constraints
+    foot_2_v   = zeros(2)
     foot_2_acc = zeros(2)
 
     # x_dot = zeros(length(x))
     # x_dot = [velocities; body_acc_x; body_acc_y; body_w; foot_1_a; foot_2_a]
-    x_dot = [vb; ω; 0.0; 0.0; 0.0; 0.0; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc]
+    x_dot = [vb; ω; foot_1_v; foot_2_v; body_acc_x; body_acc_y; body_w; foot_1_acc; foot_2_acc]
 
     return x_dot
 end
