@@ -9,7 +9,7 @@ if __name__ == "__main__":
     if not os.path.exists('../results'):
         os.mkdir('../results')
 
-    data = np.genfromtxt('data_5.csv', delimiter=',')
+    data = np.genfromtxt('data_6.csv', delimiter=',')
     data = data[:-15]
     data = data.reshape((-1, 20))
 
