@@ -16,8 +16,10 @@ function reference_trajectory(model::PlanarQuadruped, N, xterm, dt)
     Xref[end, 1:end] = range(0, dt * (N - 1), length=N)
 
     # initialize Uref
-    Uref[2, :] .= mb * g / 2  # F1_y
-    Uref[4, :] .= mb * g / 2  # F2_y
+    Uref[3, :] .= mb * g / 2   # F1_z
+    Uref[6, :] .= mb * g / 2   # F2_z
+    Uref[9, :] .= mb * g / 2   # F3_z
+    Uref[12, :] .= mb * g / 2  # F4_z
     
     Uref[end, :] .= dt
 
