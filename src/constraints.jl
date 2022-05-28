@@ -41,8 +41,10 @@ function contact_constraints!(nlp::HybridNLP{n,m}, c, Z) where {n,m}
 
     for k = 1:N
         x = Z[xi[k]]
-        d[2*k-1] = x[5]  # y1 = 0
-        d[2*k] = x[7]    # y2 = 0
+        d[4*k-3] = x[9]  # z1 = 0
+        d[4*k-2] = x[12] # z2 = 0
+        d[4*k-1] = x[15] # z3 = 0
+        d[4*k] = x[18]   # z4 = 0
     end
 
     return d
@@ -105,11 +107,11 @@ function eval_c!(nlp::HybridNLP, c, Z)
     ui = nlp.uinds
 
     c[nlp.cinds[1]] .= Z[xi[1]] - nlp.x0
-    c[nlp.cinds[2]] .= Z[xi[end]][1:14] - nlp.xf[1:14]
+    c[nlp.cinds[2]] .= Z[xi[end]][1:36] - nlp.xf[1:36]
     dynamics_constraint!(nlp, c, Z)
     contact_constraints!(nlp, c, Z)
-    c[nlp.cinds[5]] .= Z[ui[end]][2] + Z[ui[end]][4] + nlp.model.mb * nlp.model.g
-    body_pos_constraints!(nlp, c, Z)
+    # c[nlp.cinds[5]] .= Z[ui[end]][2] + Z[ui[end]][4] + nlp.model.mb * nlp.model.g
+    # body_pos_constraints!(nlp, c, Z)
     # kinematics_constraints!(nlp, c, Z)
 end
 
@@ -157,8 +159,8 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     jac_term = view(jac, nlp.cinds[2], xi[end])
     jac_dynamics = view(jac, nlp.cinds[3], :)
     jac_contact = view(jac, nlp.cinds[4], :)
-    jac_final_ctrl = view(jac, nlp.cinds[5], ui[end])
-    jac_body_pos = view(jac, nlp.cinds[6], :)
+    # jac_final_ctrl = view(jac, nlp.cinds[5], ui[end])
+    # jac_body_pos = view(jac, nlp.cinds[6], :)
     # jac_kinematics = view(jac, nlp.cinds[7], :)
 
     jac_init .= I(n)
@@ -169,27 +171,29 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
 
     # jac_contact
     for k = 1:N
-        jac_contact[2*k-1, xi[k][5]] = 1.0  # y1
-        jac_contact[2*k, xi[k][7]] = 1.0    # y2
+        jac_contact[4*k-3, xi[k][9]] = 1.0  # z1
+        jac_contact[4*k-2, xi[k][12]] = 1.0 # z2
+        jac_contact[4*k-1, xi[k][15]] = 1.0 # z3
+        jac_contact[4*k, xi[k][18]] = 1.0   # z4
     end
 
-    # jac_final_ctrl
-    jac_final_ctrl[1, 2] = 1.0
-    jac_final_ctrl[1, 4] = 1.0
+    # # jac_final_ctrl
+    # jac_final_ctrl[1, 2] = 1.0
+    # jac_final_ctrl[1, 4] = 1.0
 
-    # jac_body_pos
-    for k = 1:N
-        x = Z[xi[k]]
-        theta = x[3]
+    # # jac_body_pos
+    # for k = 1:N
+    #     x = Z[xi[k]]
+    #     theta = x[3]
 
-        jac_body_pos[k, xi[k][2]] = 1.0 # yb
+    #     jac_body_pos[k, xi[k][2]] = 1.0 # yb
 
-        if theta > 0
-            jac_body_pos[k, xi[k][3]] = -lb / 2 * cos(theta)
-        else
-            jac_body_pos[k, xi[k][3]] = lb / 2 * cos(theta)
-        end
-    end
+    #     if theta > 0
+    #         jac_body_pos[k, xi[k][3]] = -lb / 2 * cos(theta)
+    #     else
+    #         jac_body_pos[k, xi[k][3]] = lb / 2 * cos(theta)
+    #     end
+    # end
 
     # # jac_kinematics
     # for k = 1:N
