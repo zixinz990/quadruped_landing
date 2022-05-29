@@ -3,7 +3,7 @@
 
 Return a reference trajectory.
 """
-function reference_trajectory(model::PlanarQuadruped, N, xterm, dt)
+function reference_trajectory(model::RealQuadruped, N, xterm, dt)
     n, m = size(model)
 
     g, mb = model.g, model.mb
@@ -16,10 +16,10 @@ function reference_trajectory(model::PlanarQuadruped, N, xterm, dt)
     Xref[end, 1:end] = range(0, dt * (N - 1), length=N)
 
     # initialize Uref
-    Uref[3, :] .= mb * g / 2   # F1_z
-    Uref[6, :] .= mb * g / 2   # F2_z
-    Uref[9, :] .= mb * g / 2   # F3_z
-    Uref[12, :] .= mb * g / 2  # F4_z
+    Uref[3, :] .= -mb * g / 4   # F1_z
+    Uref[6, :] .= -mb * g / 4   # F2_z
+    Uref[9, :] .= -mb * g / 4   # F3_z
+    Uref[12, :] .= -mb * g / 4  # F4_z
     
     Uref[end, :] .= dt
 

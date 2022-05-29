@@ -50,19 +50,28 @@ function solve(x0, prob::HybridNLP;
 
     x_l, x_u = fill(-Inf, n_nlp), fill(+Inf, n_nlp)
 
+    # dim x + dim u = 37 + 13 = 50
+
     for k = 1:N
         # lower and upper bound of body orientation
-        x_l[3+20*(k-1)] = -pi / 2 # theta >= -pi/2
-        x_u[3+20*(k-1)] = pi / 2  # theta <= pi/2
+        x_l[4+50*(k-1)] = -pi / 2 # roll > -pi/2
+        x_l[5+50*(k-1)] = -pi / 2 # pitch > -pi/2
+        x_l[6+50*(k-1)] = -pi / 2 # yaw > -pi/2
+
+        x_u[4+50*(k-1)] = pi / 2  # roll < pi/2
+        x_u[5+50*(k-1)] = pi / 2  # pitch < pi/2
+        x_u[6+50*(k-1)] = pi / 2  # yaw < pi/2
         
         if k < N
             # lower bound and upper bound of dt
-            x_l[20+20*(k-1)] = 0.005
-            x_u[20+20*(k-1)] = 0.02
+            x_l[50+50*(k-1)] = 0.005
+            x_u[50+50*(k-1)] = 0.02
             
-            # lower bound of F
-            x_l[22+20*(k-1)] = 0.0
-            x_l[24+20*(k-1)] = 0.0
+            # lower bound of Fz
+            x_l[40+50*(k-1)] = 0.0
+            x_l[43+50*(k-1)] = 0.0
+            x_l[46+50*(k-1)] = 0.0
+            x_l[49+50*(k-1)] = 0.0
         end
     end
 
