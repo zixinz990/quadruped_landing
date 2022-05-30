@@ -44,7 +44,7 @@ The following arguments are sent to Ipopt
 * `max_iter`: maximum number of solver iterations
 """
 function solve(x0, prob::HybridNLP;
-    tol=1.0e-6, c_tol=1.0e-6, max_iter=1000)
+    tol=1.0e-6, c_tol=1.0e-6, max_iter=500)
     n_nlp, m_nlp = num_primals(prob), num_duals(prob)
     N = prob.N
 
@@ -64,7 +64,7 @@ function solve(x0, prob::HybridNLP;
         
         if k < N
             # lower bound and upper bound of dt
-            x_l[50+50*(k-1)] = 0.005
+            x_l[50+50*(k-1)] = 0.015
             x_u[50+50*(k-1)] = 0.02
             
             # lower bound of Fz
