@@ -1,0 +1,33 @@
+h = 1
+v_init_z = sqrt(2 * 9.81 * h)
+
+dt = 0.02
+N = 41
+
+# initial state
+xinit = zeros(n)
+
+xinit[3] = 0.5 # zb
+
+xinit[4] = deg2rad(15) # roll
+
+xinit[7] = 0.15 # x1
+xinit[8] = 0.1  # y1
+
+xinit[10] = -0.15 # x2
+xinit[11] = 0.1   # y2
+
+xinit[13] = 0.15 # x3
+xinit[14] = -0.1 # y3
+
+xinit[16] = -0.15 # x4
+xinit[17] = -0.1  # y4
+
+xinit[21] = -v_init_z # vzb
+
+# Desired final state
+xterm = zeros(n)
+
+xterm[3] = 0.3 # zb
+
+xterm[7:17] = xinit[7:17];

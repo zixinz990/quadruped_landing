@@ -1,6 +1,9 @@
 h = 1
 v_init_z = sqrt(2 * 9.81 * h)
 
+dt = 0.02
+N = 41
+
 # initial state
 xinit = zeros(n)
 

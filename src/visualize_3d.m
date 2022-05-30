@@ -1,5 +1,5 @@
 %% READ DATA FROM CSV FILE
-data_idx = 2;
+data_idx = 3;
 data = csvread('../results/data_'+string(data_idx)+'/data_'+string(data_idx)+'.csv');
 
 n = 37;
@@ -80,12 +80,13 @@ new_F4z = interp1(t(1:N-1), F4(3, :), new_t);
 
 %% PLOT
 fig = figure(1);
-v = VideoWriter('../results/data_'+string(data_idx)+'/landing.mp4');
+v = VideoWriter('../results/data_'+string(data_idx)+'/landing');
 open(v);
 plot_force = true;
+show_body_pos = true;
 alpha = 0.003;
 
-for k = 1:length(new_t) - 3
+for k = 2:length(new_t) - 4
     clf;
     set(fig, 'position', [400, 400, 1200, 900])
 
@@ -128,13 +129,26 @@ for k = 1:length(new_t) - 3
             [new_z4(k), new_z4(k) + alpha * new_F4z(k)]), hold on;
     end
 
+    if show_body_pos
+        body_coordinate = 'Body COM Coordinate (m): (' ...
+            +string(round(new_xb(k), 3)) + ',' ...
+            +string(round(new_yb(k), 3)) + ',' ...
+            +string(round(new_zb(k), 3)) + ')';
+        text(new_xb(k)+0.01, new_yb(k)-0.01, new_zb(k), body_coordinate);
+        
+        body_orientation = 'Body RPY (deg): (' ...
+            +string(round(rad2deg(new_roll(k)), 3)) + ',' ...
+            +string(round(rad2deg(new_pitch(k)), 3)) + ',' ...
+            +string(round(rad2deg(new_yaw(k)), 3)) + ')';
+        text(new_xb(k)+0.01, new_yb(k)-0.01, new_zb(k) - 0.05, body_orientation);
+    end
+
     axis equal, grid on;
 
     xlim([-0.5, 0.5]);
     ylim([-0.5, 0.5]);
     zlim([0, 1]);
 
-    %     drawnow;
     frame = getframe(fig);
     writeVideo(v, frame);
 end
