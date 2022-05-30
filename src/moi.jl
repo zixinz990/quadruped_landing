@@ -44,25 +44,34 @@ The following arguments are sent to Ipopt
 * `max_iter`: maximum number of solver iterations
 """
 function solve(x0, prob::HybridNLP;
-    tol=1.0e-6, c_tol=1.0e-6, max_iter=2000)
+    tol=1.0e-6, c_tol=1.0e-6, max_iter=500)
     n_nlp, m_nlp = num_primals(prob), num_duals(prob)
     N = prob.N
 
     x_l, x_u = fill(-Inf, n_nlp), fill(+Inf, n_nlp)
 
+    # dim x + dim u = 37 + 13 = 50
+
     for k = 1:N
         # lower and upper bound of body orientation
-        x_l[3+20*(k-1)] = -pi / 2 # theta >= -pi/2
-        x_u[3+20*(k-1)] = pi / 2  # theta <= pi/2
+        x_l[4+50*(k-1)] = -pi / 2 # roll > -pi/2
+        x_l[5+50*(k-1)] = -pi / 2 # pitch > -pi/2
+        x_l[6+50*(k-1)] = -pi / 2 # yaw > -pi/2
+
+        x_u[4+50*(k-1)] = pi / 2  # roll < pi/2
+        x_u[5+50*(k-1)] = pi / 2  # pitch < pi/2
+        x_u[6+50*(k-1)] = pi / 2  # yaw < pi/2
         
         if k < N
             # lower bound and upper bound of dt
-            x_l[20+20*(k-1)] = 0.001
-            x_u[20+20*(k-1)] = 0.02
-
-            # lower bound of F
-            x_l[22+20*(k-1)] = 0.0
-            x_l[24+20*(k-1)] = 0.0
+            x_l[50+50*(k-1)] = 0.018
+            x_u[50+50*(k-1)] = 0.02
+            
+            # lower bound of Fz
+            x_l[40+50*(k-1)] = 0.0
+            x_l[43+50*(k-1)] = 0.0
+            x_l[46+50*(k-1)] = 0.0
+            x_l[49+50*(k-1)] = 0.0
         end
     end
 
