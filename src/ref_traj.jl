@@ -3,7 +3,7 @@
 
 Return a reference trajectory.
 """
-function reference_trajectory(model::PlanarQuadruped, N, k_trans, xterm, dt)
+function reference_trajectory(model::RealQuadruped, N, k_trans, xterm, dt)
     n, m = size(model)
 
     Xref = zeros(n, N)

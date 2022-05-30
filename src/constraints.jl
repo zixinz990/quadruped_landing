@@ -151,7 +151,7 @@ function eval_c!(nlp::HybridNLP, c, Z)
     ui = nlp.uinds
 
     c[nlp.cinds[1]] .= Z[xi[1]] - nlp.x0
-    c[nlp.cinds[2]] .= Z[xi[end]][1:14] - nlp.xf[1:14]
+    c[nlp.cinds[2]] .= Z[xi[end]][1:36] - nlp.xf[1:36]
     dynamics_constraint!(nlp, c, Z)
     contact_init_constraints!(nlp, c, Z)
     contact_another_constraints!(nlp, c, Z)
