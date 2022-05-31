@@ -80,8 +80,8 @@ new_F4z = interp1(t(1:N-1), F4(3, :), new_t);
 
 %% PLOT
 fig = figure(1);
-% v = VideoWriter('../results/data_'+string(data_idx)+'/landing');
-% open(v);
+v = VideoWriter('../results/data_'+string(data_idx)+'/landing');
+open(v);
 plot_force = true;
 show_body_pos = true;
 alpha = 0.003;
@@ -113,6 +113,12 @@ for k = 2:length(new_t) - 4
         [new_y4(k), new_yb(k)], ...
         [new_z4(k), new_zb(k)]), hold on;
 
+    % plot feet
+    plot3([new_x1(k)], [new_y1(k)], [new_z1(k)], 'o'), hold on;
+    plot3([new_x2(k)], [new_y2(k)], [new_z2(k)], 'o'), hold on;
+    plot3([new_x3(k)], [new_y3(k)], [new_z3(k)], 'o'), hold on;
+    plot3([new_x4(k)], [new_y4(k)], [new_z4(k)], 'o'), hold on;
+    
     % plot forces
     if plot_force
         plot3([new_x1(k), new_x1(k) + alpha * new_F1x(k)], ...
@@ -149,10 +155,9 @@ for k = 2:length(new_t) - 4
     ylim([-0.5, 0.5]);
     zlim([0, 1]);
 
-    drawnow;
-    
-%     frame = getframe(fig);
-%     writeVideo(v, frame);
+    frame = getframe(fig);
+    writeVideo(v, frame);
 end
 
-close(v);
+clos
+e(v);

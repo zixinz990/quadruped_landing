@@ -153,8 +153,8 @@ function eval_c!(nlp::HybridNLP, c, Z)
     c[nlp.cinds[1]] .= Z[xi[1]] - nlp.x0
     c[nlp.cinds[2]] .= Z[xi[end]][1:36] - nlp.xf[1:36]
     dynamics_constraint!(nlp, c, Z)
-    contact_init_constraints!(nlp, c, Z)
-    contact_another_constraints!(nlp, c, Z)
+    # contact_init_constraints!(nlp, c, Z)
+    # contact_another_constraints!(nlp, c, Z)
     # c[nlp.cinds[6]] .= Z[ui[end]][2] + Z[ui[end]][4] + nlp.model.mb * nlp.model.g
     # body_pos_constraints!(nlp, c, Z)
     # kinematics_constraints!(nlp, c, Z)
@@ -223,8 +223,8 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     jac_init = view(jac, nlp.cinds[1], xi[1])
     jac_term = view(jac, nlp.cinds[2], xi[end])
     jac_dynamics = view(jac, nlp.cinds[3], :)
-    jac_contact_init = view(jac, nlp.cinds[4], :)
-    jac_contact_another = view(jac, nlp.cinds[5], :)
+    # jac_contact_init = view(jac, nlp.cinds[4], :)
+    # jac_contact_another = view(jac, nlp.cinds[5], :)
     # jac_final_ctrl = view(jac, nlp.cinds[6], ui[end])
     # jac_body_pos = view(jac, nlp.cinds[7], :)
     # jac_kinematics = view(jac, nlp.cinds[8], :)
@@ -235,33 +235,33 @@ function jac_c!(nlp::HybridNLP{n,m}, jac, Z) where {n,m}
     # jac_dynamics
     dynamics_jacobian!(nlp, jac, Z)
 
-    # jac_contact_init
-    if init_mode == 1
-        for k = 1:N
-            jac_contact_init[2*k-1, xi[k][9]] = 1.0 # z1
-            jac_contact_init[2*k, xi[k][15]] = 1.0  # z3
-        end
-    else
-        for k = 1:N
-            jac_contact_init[2*k-1, xi[k][12]] = 1.0 # z2
-            jac_contact_init[2*k, xi[k][18]] = 1.0   # z4
-        end
-    end
+    # # jac_contact_init
+    # if init_mode == 1
+    #     for k = 1:N
+    #         jac_contact_init[2*k-1, xi[k][9]] = 1.0 # z1
+    #         jac_contact_init[2*k, xi[k][15]] = 1.0  # z3
+    #     end
+    # else
+    #     for k = 1:N
+    #         jac_contact_init[2*k-1, xi[k][12]] = 1.0 # z2
+    #         jac_contact_init[2*k, xi[k][18]] = 1.0   # z4
+    #     end
+    # end
 
-    # jac_contact_another
-    if init_mode == 1
-        for k = k_trans:N
-            i = k - k_trans + 1
-            jac_contact_another[2*i-1, xi[i][12]] = 1.0 # z2
-            jac_contact_another[2*i, xi[i][18]] = 1.0   # z4
-        end
-    else
-        for k = k_trans:N
-            i = k - k_trans + 1
-            jac_contact_another[2*i-1, xi[i][9]] = 1.0 # z1
-            jac_contact_another[2*i, xi[i][15]] = 1.0  # z3
-        end
-    end
+    # # jac_contact_another
+    # if init_mode == 1
+    #     for k = k_trans:N
+    #         i = k - k_trans + 1
+    #         jac_contact_another[2*i-1, xi[i][12]] = 1.0 # z2
+    #         jac_contact_another[2*i, xi[i][18]] = 1.0   # z4
+    #     end
+    # else
+    #     for k = k_trans:N
+    #         i = k - k_trans + 1
+    #         jac_contact_another[2*i-1, xi[i][9]] = 1.0 # z1
+    #         jac_contact_another[2*i, xi[i][15]] = 1.0  # z3
+    #     end
+    # end
 
     # # jac_final_ctrl
     # jac_final_ctrl[1, 2] = 1.0
