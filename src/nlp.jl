@@ -49,8 +49,8 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
         c_term_inds = (c_init_inds[end]+1):(c_init_inds[end]+n-1)                                        # terminal constraint
         c_dyn_inds = (c_term_inds[end]+1):(c_term_inds[end]+(N-1)*n)                                     # dynamics constraints
 
-        # c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+2*N)                                  # contact constraints of the initial touch-down feet
-        # c_another_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+2*(N-k_trans+1)) # contact constraints of another feet
+        c_init_contact_inds = (c_dyn_inds[end]+1):(c_dyn_inds[end]+2*N)                                  # contact constraints of the initial touch-down feet
+        c_another_contact_inds = (c_init_contact_inds[end]+1):(c_init_contact_inds[end]+2*(N-k_trans+1)) # contact constraints of another feet
 
         # c_final_ctrl_inds = (c_another_contact_inds[end]+1):(c_another_contact_inds[end]+1)              # final control constraint
 
@@ -59,7 +59,7 @@ struct HybridNLP{n,m,L,Q} <: MOI.AbstractNLPEvaluator
 
         # c_kin_inds = (c_body_pos_inds[end]+1):(c_body_pos_inds[end]+2*N)                         # kinematic constraints (2 per time step)
 
-        cinds = [c_init_inds, c_term_inds, c_dyn_inds]
+        cinds = [c_init_inds, c_term_inds, c_dyn_inds, c_init_contact_inds, c_another_contact_inds]
         m_nlp = cinds[end][end]
 
         # Constraints bounds

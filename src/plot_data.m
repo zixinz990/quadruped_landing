@@ -1,4 +1,4 @@
-data = csvread('../results/data_1.csv');
+data = csvread('../results/data_3/data_3.csv');
 N = 41;
 
 % plot forces on the feet
@@ -32,10 +32,9 @@ new_F1_mag = interp1(t, F1_mag, new_t);
 
 figure(1);
 plot(t, F1_mag), hold on;
-plot(new_t, new_F1_mag), hold on;
-% plot(t, F2_mag), hold on;
-% plot(t, F3_mag), hold on;
-% plot(t, F4_mag), hold on;
+plot(t, F2_mag), hold on;
+plot(t, F3_mag), hold on;
+plot(t, F4_mag), hold on;
 
 xlim([0, t(N-1)]);
 

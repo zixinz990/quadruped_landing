@@ -1,5 +1,5 @@
 %% READ DATA FROM CSV FILE
-data_idx = 1;
+data_idx = 3;
 data = csvread('../results/data_'+string(data_idx)+'/data_'+string(data_idx)+'.csv');
 
 n = 37;
@@ -153,11 +153,10 @@ for k = 2:length(new_t) - 4
 
     xlim([-0.5, 0.5]);
     ylim([-0.5, 0.5]);
-    zlim([0, 1]);
+    zlim([-0.1, 1]);
 
     frame = getframe(fig);
     writeVideo(v, frame);
 end
 
-clos
-e(v);
+close(v);
