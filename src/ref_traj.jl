@@ -16,9 +16,9 @@ function reference_trajectory(model::PlanarQuadruped, N, xterm, dt)
     Xref[end, 1:end] = range(0, dt * (N - 1), length=N)
 
     # initialize Uref
-    Uref[2, :] .= mb * g / 2  # F1_y
-    Uref[4, :] .= mb * g / 2  # F2_y
-    
+    Uref[2, 2:end] .= -mb * g / 2  # F1_y
+    Uref[4, 2:end] .= -mb * g / 2  # F2_y
+
     Uref[end, :] .= dt
 
     # Convert to a trajectory

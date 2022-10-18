@@ -57,14 +57,18 @@ function solve(x0, prob::HybridNLP;
         
         if k < N
             # lower bound and upper bound of dt
-            x_l[20+20*(k-1)] = 0.005
-            x_u[20+20*(k-1)] = 0.02
+            x_l[20+20*(k-1)] = 0.01
+            x_u[20+20*(k-1)] = 0.04
             
             # lower bound of F
             x_l[22+20*(k-1)] = 0.0
             x_l[24+20*(k-1)] = 0.0
         end
     end
+
+    # initial GRFs are 0
+    x_l[16:19] .= 0.0
+    x_u[16:19] .= 0.0
 
     c_l, c_u = prob.lb, prob.ub
 
